@@ -17,10 +17,24 @@
 </head>
 <body>
     <div class="container">
+        <!-- Bloque para mostrar mensajes flash -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert">
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
+        
         <h1>Lista de Transportistas</h1>
 
         <!-- Formulario de búsqueda -->
         <form id="searchForm" class="search-form" method="GET" action="{{ url_for('transportistas') }}" onsubmit="cleanPhoneNumber()">
+            {% if session.get('permiso_buscador_15') == 1 %}
             <div class="search-group">
                 <select name="search_criteria">
                     <option value="nombre_empresa" {% if search_criteria == 'nombre_empresa' %}selected{% endif %}>Nombre de la Empresa</option>
@@ -38,10 +52,18 @@
                 <input type="hidden" name="page" id="currentPage" value="{{ page }}">
             </div>
             <button type="submit" class="search-button">Buscar</button>
+            {% endif %}
         </form>
-
+        {% if session.get('permiso_crear_15') == 1 %}
         <a class="button-link ing" href="{{ url_for('index_transportistas') }}">Ingresar Datos de Transportista</a>
-        <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
+        {% endif %}
+        <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+        {% if session.get('permiso_exportar_pdf_15') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_transportistas_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+        {% endif %}
+        {% if session.get('permiso_exportar_excel_15') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_excel') }}">Descargar Lista en Excel</a>
+        {% endif %}
         <table>
             <tr>
                 <th>ID del Transportista</th>
@@ -55,43 +77,16 @@
                 <td>{{ transportista[1] }}</td>
                 <td>{{ transportista[2] }}</td>
                 <td>
-                    <a class="button-link baa" href="#" onclick="openEditWindow('{{ url_for('edit_transportista', id_transportista=transportista[0]) }}'); return false;">
-                        Editar <i class='bx bx-edit' style='color:#000000'></i>
-                    </a>
-                    <a class="button-link bee" href="{{ url_for('eliminar_transportista', id_transportista=transportista[0]) }}">
-                        Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i>
-                    </a>
+                    {% if session.get('permiso_editar_15') == 1 %}
+                    <a class="button-link baa" href="#" onclick="openWindow('{{ url_for('edit_transportista', id_transportista=transportista[0]) }}')">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                    {% endif %}
+                    {% if session.get('permiso_eliminar_15') == 1 %}
+                    <a class="button-link bee" href="{{ url_for('eliminar_transportista', id_transportista=transportista[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
         </table>
-
-        <script>
-            // Función para abrir la ventana de edición en una nueva ventana emergente
-            function openEditWindow(url) {
-                window.open(url, "_blank", "width=600,height=400");
-            }
-
-            // Función para enviar el formulario cuando cambie el valor del selector de 'per_page'
-            document.getElementById('per_page').addEventListener('change', function() {
-                var form = document.getElementById('searchForm');
-                form.submit();
-            });
-
-            // Función para formatear el número de teléfono con un guion automáticamente
-            document.addEventListener('DOMContentLoaded', function() {
-                var telefonoInput = document.querySelector('input[name="telefono"]');
-                if (telefonoInput) {
-                    telefonoInput.addEventListener('input', function(event) {
-                        var value = event.target.value.replace(/-/g, '');
-                        if (value.length > 4) {
-                            value = value.slice(0, 3) + '-' + value.slice(3, 7);
-                        }
-                        event.target.value = value;
-                    });
-                }
-            });
-        </script>
 
         <div class="pagination">
             {% if page > 1 %}

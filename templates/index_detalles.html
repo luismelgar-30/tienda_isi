@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Detalle de Compra</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <!-- Incluir CSS de Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Incluir jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Incluir JS de Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        // Función para actualizar el campo de precio unitario
+        function actualizarPrecioUnitario() {
+            const selectProducto = document.getElementById("id_producto");
+            const precioUnitario = document.getElementById("precio_unitario");
+
+            const precio = selectProducto.options[selectProducto.selectedIndex].getAttribute("data-precio");
+            precioUnitario.value = precio ? parseFloat(precio).toFixed(2) : '';
+            actualizarSubtotal();
+        }
+
+        // Función para actualizar el campo de cantidad en stock
+        function actualizarCantidadEnStock() {
+            const selectProducto = document.getElementById("id_producto");
+            const cantidadEnStockLabel = document.getElementById("cantidad_en_stock_label");
+
+            const idProducto = selectProducto.value;
+            if (idProducto) {
+                // Hacer una solicitud AJAX para obtener la cantidad en stock del producto
+                fetch(`/get_stock/${idProducto}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        cantidadEnStockLabel.innerText = `En Inventario: ${data.stock}`;
+                        validateCantidad(); // Validar la cantidad al actualizar el stock
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener la cantidad en stock:', error);
+                        cantidadEnStockLabel.innerText = 'N/A';
+                    });
+            } else {
+                cantidadEnStockLabel.innerText = 'N/A';
+            }
+        }
+
+        // Validación y limitación de cantidad
+        function validateCantidad() {
+            var cantidadField = document.getElementById('cantidad');
+            var cantidadValue = parseFloat(cantidadField.value);
+            var cantidadEnStock = parseFloat(document.getElementById("cantidad_en_stock_label").innerText.replace(/[^0-9.-]+/g,"")) || 0;
+
+            if (cantidadValue > cantidadEnStock) {
+                cantidadField.value = cantidadEnStock;
+                alert('La cantidad ingresada excede el stock disponible.');
+            }
+
+            if (cantidadValue > 1000) {
+                cantidadField.value = 1000;
+            }
+
+            // Limitar a 4 dígitos
+            if (cantidadField.value.length > 4) {
+                cantidadField.value = cantidadField.value.slice(0, 4);
+            }
+
+            actualizarSubtotal();
+        }
+
+        // Función para calcular el subtotal
+        function actualizarSubtotal() {
+            const cantidad = parseFloat(document.getElementById("cantidad").value) || 0;
+            const precioUnitario = parseFloat(document.getElementById("precio_unitario").value) || 0;
+            const subtotal = cantidad * precioUnitario;
+            document.getElementById("subtotal").value = subtotal.toFixed(2);
+            actualizarTotal(); // Actualiza el total cada vez que cambie el subtotal
+        }
+
+        // Función para calcular el total
+        function actualizarTotal() {
+            const subtotal = parseFloat(document.getElementById("subtotal").value) || 0;
+            const impuestoSelect = document.getElementById("id_impuesto");
+            const impuestoTasa = parseFloat(impuestoSelect.options[impuestoSelect.selectedIndex]?.text?.replace('%', '') || 0);
+            const total = subtotal + (subtotal * (impuestoTasa / 100));
+            document.getElementById("total").value = total.toFixed(2);
+        }
+
+        // Función para validar el formulario antes de enviarlo
+        function validarFormulario(event) {
+            const cantidadField = document.getElementById('cantidad');
+            const cantidadEnStock = parseFloat(document.getElementById("cantidad_en_stock_label").innerText.replace(/[^0-9.-]+/g,"")) || 0;
+            const cantidadValue = parseFloat(cantidadField.value);
+
+            if (cantidadValue > cantidadEnStock) {
+                alert('La cantidad ingresada excede el stock disponible.');
+                event.preventDefault(); // Prevenir el envío del formulario
+            }
+        }
+
+        // Escuchar los cambios en el campo de cantidad y el campo de impuesto para recalcular el subtotal y total
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("cantidad").addEventListener("input", validateCantidad);
+            document.getElementById("id_impuesto").addEventListener("change", actualizarTotal);
+
+            // Inicializar Select2 para los selectores
+            $('#id_empleado').select2({
+                placeholder: "Seleccione un empleado",
+                allowClear: true
+            });
+
+            $('#id_producto').select2({
+                placeholder: "Seleccione un producto",
+                allowClear: true
+            });
+
+            // Actualizar el precio unitario y la cantidad en stock al cargar
+            document.getElementById("id_producto").addEventListener("change", function() {
+                actualizarPrecioUnitario();
+                actualizarCantidadEnStock();
+            });
+
+            // Agregar evento al enviar el formulario
+            document.querySelector('form').addEventListener('submit', validarFormulario);
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Agregar Detalle de Compra</h1>
+
+        <form action="{{ url_for('submit_detalle') }}" method="POST">
+            
+                <label for="id_pedido">Pedido:</label>
+                <select name="id_pedido" id="id_pedido" required >
+                    {% for pedido in pedidos %}
+                        <option value="{{ pedido[0] }}" {% if loop.first %} selected {% endif %}>
+                            {{ pedido[0] }}
+                        </option>
+                    {% endfor %}
+                </select><br>
+            
+            
+
+            <label for="id_producto">Producto:</label>
+            <select name="id_producto" id="id_producto" onchange="actualizarPrecioUnitario(); actualizarCantidadEnStock()" required>
+                <option value="" selected disabled>Seleccione un producto</option>
+                {% for producto in productos %}
+                    <option value="{{ producto[0] }}" data-precio="{{ producto[2] }}">{{ producto[1] }}</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="cantidad">Cantidad:</label>
+            <input type="number" name="cantidad" id="cantidad" min="0" max="1000" step="any" oninput="validateCantidad()" required><br>
+
+            <label id="cantidad_en_stock_label">En Inventario: N/A</label><br>
+
+            <label for="precio_unitario">Precio Unitario:</label>
+            <input type="number" step="0.01" name="precio_unitario" id="precio_unitario" readonly required><br>
+
+            <label for="subtotal">Subtotal:</label>
+            <input type="number" step="0.01" name="subtotal" id="subtotal" readonly><br>
+
+            <label for="id_impuesto">Impuesto:</label>
+            <select name="id_impuesto" id="id_impuesto" required>
+                <Option value="">Seleccione el Impuesto</Option>
+                {% for impuesto in impuestos %}
+                    <option value="{{ impuesto[0] }}">{{ impuesto[1] }}%</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="total">Total:</label>
+            <input type="number" step="0.01" name="total" id="total" readonly><br>
+
+            <button type="submit">Agregar Detalle</button>
+        </form>
+
+        <a href="{{ url_for('detalles_compra') }}">Ver detalles de compra</a>
+    </div>
+</body>
+</html>

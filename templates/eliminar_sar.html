@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar SAR</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+    <h1>Eliminar SAR</h1>
+    <p>¿Estás seguro que deseas eliminar el SAR con RTN: {{ sar[1] }} y CAI: {{ sar[2] }}?</p>
+    <form action="{{ url_for('eliminar_sar', id_sar=sar[0]) }}" method="POST">
+        <button type="submit">Sí, eliminar</button>
+        <a href="{{ url_for('sars') }}">Cancelar</a>
+    </form>
+</div>
+</body>
+</html>

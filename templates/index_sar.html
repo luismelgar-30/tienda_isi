@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de SAR</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function generarCAI() {
+            const rtn = document.getElementById("rtn").value;
+            const fechaEmision = document.getElementById("fecha_emision").value;
+            const fechaVencimiento = document.getElementById("fecha_vencimiento").value;
+            const rangoInicial = document.getElementById("rango_inicial").value;
+            const rangoFinal = document.getElementById("rango_final").value;
+            const secuencial = document.getElementById("secuencial").value;
+            const estado = document.getElementById("estado").value;
+
+            if (rtn && fechaEmision && fechaVencimiento && rangoInicial && rangoFinal && secuencial && estado) {
+                const partes = [];
+                for (let i = 0; i < 5; i++) {
+                    partes.push(Math.random().toString(36).substring(2, 8).toUpperCase());
+                }
+                partes.push(Math.random().toString(36).substring(2, 4).toUpperCase());
+                document.getElementById("cai").value = partes.join("-");
+            }
+        }
+
+        function formatearRTN(event) {
+            let rtn = event.target.value.replace(/\D/g, '');
+            if (rtn.length > 14) rtn = rtn.substring(0, 14);
+            if (rtn.length > 10) {
+                rtn = rtn.replace(/(\d{4})(\d{4})(\d{6})/, '$1-$2-$3');
+            } else if (rtn.length > 8) {
+                rtn = rtn.replace(/(\d{4})(\d{4})(\d+)/, '$1-$2-$3');
+            } else if (rtn.length > 4) {
+                rtn = rtn.replace(/(\d{4})(\d+)/, '$1-$2');
+            }
+            event.target.value = rtn;
+        }
+
+        function validarRTN() {
+            const rtn = document.getElementById("rtn").value;
+            const regex = /^\d{4}-\d{4}-\d{6}$/;
+            const primerDigito = rtn.charAt(0);
+
+            if (!regex.test(rtn)) {
+                alert("El RTN debe tener exactamente 14 dígitos en el formato XXXX-XXXX-XXXXXX.");
+                document.getElementById("rtn").focus();
+                return false;
+            }
+
+            if (primerDigito !== '0' && primerDigito !== '1') {
+                alert("El RTN debe comenzar con el número 0 o 1.");
+                document.getElementById("rtn").focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        function formatearRango(event) {
+            let valor = event.target.value.replace(/\D/g, '');
+            if (valor.length > 8) valor = valor.substring(0, 8);
+            event.target.value = valor;
+        }
+
+        function completarRango(event) {
+            let valor = event.target.value;
+            event.target.value = valor.padStart(8, '0');
+        }
+
+        function validarRangos() {
+            const rangoInicial = document.getElementById("rango_inicial").value;
+            const rangoFinal = document.getElementById("rango_final").value;
+            if (parseInt(rangoInicial) > parseInt(rangoFinal)) {
+                alert("El Rango Inicial no puede ser mayor que el Rango Final.");
+                return false;
+            }
+            return true;
+        }
+
+        function validarSecuencial() {
+            const secuencial = document.getElementById("secuencial").value;
+            const regex = /^\d{3}$/;
+            if (!regex.test(secuencial)) {
+                alert("El campo Secuencial debe contener exactamente 3 números.");
+                document.getElementById("secuencial").focus();
+                return false;
+            }
+            return true;
+        }
+
+        function establecerFechas() {
+            const hoy = new Date();
+            const fechaEmision = hoy.toISOString().split('T')[0];
+            document.getElementById("fecha_emision").value = fechaEmision;
+
+            actualizarFechaVencimiento(); // Actualizar la fecha de vencimiento cuando cambia la fecha de emisión
+
+            document.getElementById("fecha_emision").addEventListener('change', actualizarFechaVencimiento);
+        }
+
+        function actualizarFechaVencimiento() {
+            const fechaEmision = new Date(document.getElementById("fecha_emision").value);
+            const fechaVencimiento = new Date(fechaEmision);
+            fechaVencimiento.setFullYear(fechaEmision.getFullYear() + 1);
+            const vencimiento = fechaVencimiento.toISOString().split('T')[0];
+            document.getElementById("fecha_vencimiento").value = vencimiento;
+        }
+
+        document.addEventListener('input', generarCAI);
+        document.addEventListener('DOMContentLoaded', () => {
+            establecerFechas();
+
+            document.getElementById("rango_inicial").addEventListener('input', formatearRango);
+            document.getElementById("rango_inicial").addEventListener('blur', completarRango);
+            document.getElementById("rango_final").addEventListener('input', formatearRango);
+            document.getElementById("rango_final").addEventListener('blur', completarRango);
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Gestión de SAR</h1>
+        <form action="{{ url_for('submit') }}" method="POST" onsubmit="return validarRTN() && validarRangos() && validarSecuencial()">
+            <label for="rtn">RTN:</label>
+            <input type="text" id="rtn" name="rtn" required placeholder="XXXX-XXXX-XXXXXX" maxlength="14" oninput="formatearRTN(event)">
+            <label for="cai">CAI:</label>
+            <input type="text" id="cai" name="cai" required readonly>
+            <label for="fecha_emision">Fecha de Emisión:</label>
+            <input type="date" id="fecha_emision" name="fecha_emision" required>
+            <label for="fecha_vencimiento">Fecha de Vencimiento:</label>
+            <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" required>
+            <label for="rango_inicial">Rango Inicial:</label>
+            <input type="text" id="rango_inicial" name="rango_inicial" required maxlength="8">
+            <label for="rango_final">Rango Final:</label>
+            <input type="text" id="rango_final" name="rango_final" required maxlength="8">
+            <label for="id_sucursal">Sucursal:</label>
+            <select id="id_sucursal" name="id_sucursal" required>
+                {% for id_sucursal, ciudad in sucursales %}
+                <option value="{{ id_sucursal }}">{{ ciudad }}</option>
+                {% endfor %}
+            </select>
+            <label for="secuencial">Secuencial:</label>
+            <input type="text" id="secuencial" name="secuencial" required maxlength="3" oninput="this.value = this.value.replace(/\D/g, '')">
+            <label for="estado">Estado:</label>
+            <select id="estado" name="estado" required>
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+            </select>
+            <br>
+            <button type="submit">Agregar SAR</button>
+            <br>
+        </form>
+        <a href="{{ url_for('sars') }}">Ver SARS</a>
+    </div>
+</body>
+</html>

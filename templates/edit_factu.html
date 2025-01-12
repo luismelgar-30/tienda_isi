@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Editar Factura</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Editar Factura</h2>
+        <form action="{{ url_for('edit_factu', id_factura=factu[0]) }}" method="post">
+          <label for="id_sar">ID SAR:</label>
+          <select id="id_sar" name="id_sar" required>
+            {% for sar in sar_list %}
+                <option value="{{ sar }}" {% if sar == factu[1] %}selected{% endif %}>{{ sar }}</option>
+            {% endfor %}
+          </select><br><br>
+          <label for="numero_factura">Número Factura:</label>
+          <input type="text" id="numero_factura" name="numero_factura" value="{{ factu[2] }}" required><br><br>
+          <button type="submit">Actualizar Factura</button>
+        </form>
+        <br>
+        <a href="{{ url_for('factu') }}">Volver a Lista de Facturas</a>
+    </div>
+</body>
+</html>

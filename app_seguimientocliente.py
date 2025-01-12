@@ -346,4 +346,4 @@ def eliminar_seguimiento(id_seguimiento):
 
 
 if __name__ == '__main__':
-    app_seguimiento.run(debug=True,port=5025)
+    app_seguimiento.run(debug=True,port=5028)

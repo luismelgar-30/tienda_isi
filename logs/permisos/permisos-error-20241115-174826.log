@@ -1,0 +1,1 @@
+20241115-174826 - ERROR: Error al insertar en la base de datos: 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`proyecto_is1`.`permisos`, CONSTRAINT `fk_permiso_pantalla` FOREIGN KEY (`id_permiso_pantalla`) REFERENCES `n_pantallas` (`id_permiso_pantalla`))

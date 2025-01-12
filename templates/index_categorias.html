@@ -8,16 +8,7 @@
 <body>
     <div class="container">
         <h2>Ingresar Categoría</h2>
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-          {% endif %}
-        {% endwith %}
-        <form action="{{ url_for('submit_categoria') }}" method="post">
+        <form id="categoriaForm" action="{{ url_for('submit_categoria') }}" method="post">
             <label for="nombre_categoria">Nombre de la Categoría:</label>
             <input type="text" id="nombre_categoria" name="nombre_categoria" required><br><br>
             
@@ -29,5 +20,68 @@
         <br>
         <a href="{{ url_for('categorias') }}">Lista de categorías</a>
     </div>
+
+    <script>
+        document.getElementById('categoriaForm').addEventListener('submit', function(event) {
+            let errors = [];
+
+            // Validación del nombre de la categoría
+            const nombreCategoria = document.getElementById('nombre_categoria').value;
+            
+            if (/\d/.test(nombreCategoria)) {
+                errors.push('El nombre no puede contener números.');
+            } 
+            if (/[^a-zA-Z\s]/.test(nombreCategoria)) {
+                errors.push('El nombre no puede contener caracteres especiales.');
+            }
+            if (nombreCategoria.length < 3 || nombreCategoria.length > 20) {
+                errors.push('El nombre debe tener entre 3 y 20 caracteres.');
+            }
+
+            // Validación de la descripción
+            const descripcion = document.getElementById('Descripcion').value;
+            
+            if (/\d/.test(descripcion)) {
+                errors.push('La descripción no puede contener números.');
+            }
+            if (/[^a-zA-Z\s]/.test(descripcion)) {
+                errors.push('La descripción no puede contener caracteres especiales.');
+            }
+            if (descripcion.length < 3 || descripcion.length > 50) {
+                errors.push('La descripción debe tener entre 3 y 50 caracteres.');
+            }
+
+            // Si hay errores, prevenir el envío del formulario y mostrar los mensajes
+            if (errors.length > 0) {
+                event.preventDefault(); // Prevenir el envío del formulario
+                alert(errors.join('\n')); // Mostrar mensajes de error
+            } else {
+                // Si no hay errores, procedemos a enviar el formulario usando Fetch
+                event.preventDefault(); // Prevenir el envío estándar para usar Fetch
+
+                // Obtener los datos del formulario
+                const formData = new FormData(event.target);
+
+                // Enviar los datos del formulario usando Fetch API
+                fetch(event.target.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Si la respuesta es exitosa, redirigir a la página de categorías
+                        window.location.href = 'http://127.0.0.1:5009/categorias';
+                    } else {
+                        // Si hubo un error en el servidor, mostrar un mensaje
+                        alert('Hubo un error al guardar la categoría. Intente nuevamente.');
+                    }
+                })
+                .catch(error => {
+                    // Manejar errores de red (por ejemplo, no se puede conectar al servidor)
+                    alert('Error de conexión. Intente nuevamente.');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

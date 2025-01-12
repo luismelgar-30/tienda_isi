@@ -4,36 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Idea de Mejora</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function validarDocumento(documento) {
+            // Validación de que el documento tiene 13 dígitos y comienza con 01-18
+            var regex = /^(0[1-9]|1[0-8])[0-9]{11}$/;
+            return regex.test(documento);
+        }
+
+        function validarTexto(texto) {
+            // Validación de que el texto solo contiene letras y comas, sin números ni signos, 
+            // longitud entre 3 y 50 caracteres y sin más de tres letras seguidas
+            var regex = /^(?!.*([a-zA-Z])\1\1)[a-zA-Z ,]{3,50}$/;
+            return regex.test(texto);
+        }
+
+        function validarFormulario() {
+            var documento = document.getElementById('documento').value;
+            var descripcionIdea = document.getElementById('descripcion_idea').value;
+            var descripcionImplementacion = document.getElementById('descripcion_implementacion').value;
+
+            if (!validarDocumento(documento)) {
+                alert('El documento debe tener 13 dígitos y comenzar con un número entre 01 y 18.');
+                return false;
+            }
+
+            if (!validarTexto(descripcionIdea)) {
+                alert('La descripción de la idea debe contener entre 3 y 50 caracteres, solo letras y comas, sin números ni signos, y sin más de tres letras seguidas.');
+                return false;
+            }
+
+            if (!validarTexto(descripcionImplementacion)) {
+                alert('La descripción de la implementación debe contener entre 3 y 50 caracteres, solo letras y comas, sin números ni signos, y sin más de tres letras seguidas.');
+                return false;
+            }
+
+            // Validaciones de fecha (sin cambios)
+            var fechaPropuesta = new Date(document.getElementById('fecha_propuesta').value);
+            var fechaImplementacion = new Date(document.getElementById('fecha_implementacion').value);
+            var fechaEvaluacion = new Date(document.getElementById('fecha_evaluacion').value);
+            var fechaActual = new Date();
+            var unMesAtras = new Date();
+            unMesAtras.setMonth(unMesAtras.getMonth() - 1);
+
+            if (fechaPropuesta > fechaActual || fechaPropuesta < unMesAtras) {
+                alert('La fecha propuesta no puede ser futura y debe ser como máximo un mes atrás.');
+                return false;
+            }
+
+            if (fechaImplementacion < fechaActual.setHours(0, 0, 0, 0)) {
+                alert('La fecha de implementación debe ser la fecha actual o una fecha futura.');
+                return false;
+            }
+
+            if (fechaEvaluacion < fechaImplementacion) {
+                alert('La fecha de evaluación debe ser la misma fecha de implementación o una fecha futura.');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Asignar fecha actual por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            var hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha_propuesta').setAttribute('max', hoy);
+            document.getElementById('fecha_implementacion').setAttribute('min', hoy);
+            document.getElementById('fecha_evaluacion').setAttribute('min', hoy);
+        });
+    </script>
 </head>
 <body>
     <h1>Editar Idea de Mejora</h1>
-    <form action="{{ url_for('edit_idea', id_mejora=idea[0]) }}" method="POST">
+    <form action="{{ url_for('editar_idea', id=idea[0]) }}" method="POST" onsubmit="return validarFormulario()">
         <label for="documento">Documento:</label>
         <input type="text" id="documento" name="documento" value="{{ idea[1] }}" required>
+
         <label for="fecha_propuesta">Fecha Propuesta:</label>
         <input type="date" id="fecha_propuesta" name="fecha_propuesta" value="{{ idea[2] }}" required>
+
         <label for="descripcion_idea">Descripción de la Idea:</label>
         <textarea id="descripcion_idea" name="descripcion_idea" required>{{ idea[3] }}</textarea>
+
         <label for="estado">Estado:</label>
         <input type="text" id="estado" name="estado" value="{{ idea[4] }}" required>
+
         <label for="fecha_implementacion">Fecha Implementación:</label>
         <input type="date" id="fecha_implementacion" name="fecha_implementacion" value="{{ idea[5] }}" required>
+
         <label for="descripcion_implementacion">Descripción de la Implementación:</label>
         <textarea id="descripcion_implementacion" name="descripcion_implementacion" required>{{ idea[6] }}</textarea>
+
         <label for="fecha_evaluacion">Fecha Evaluación:</label>
         <input type="date" id="fecha_evaluacion" name="fecha_evaluacion" value="{{ idea[7] }}" required>
+
         <label for="impacto">Impacto:</label>
         <select id="impacto" name="impacto" required>
             <option value="a futuro" {% if idea[8] == 'a futuro' %}selected{% endif %}>A Futuro</option>
             <option value="inmediato" {% if idea[8] == 'inmediato' %}selected{% endif %}>Inmediato</option>
         </select>
+
         <label for="indicadores_rendimiento">Indicadores de Rendimiento:</label>
         <select id="indicadores_rendimiento" name="indicadores_rendimiento" required>
             <option value="alto" {% if idea[9] == 'alto' %}selected{% endif %}>Alto</option>
             <option value="medio" {% if idea[9] == 'medio' %}selected{% endif %}>Medio</option>
             <option value="bajo" {% if idea[9] == 'bajo' %}selected{% endif %}>Bajo</option>
         </select>
+
         <button type="submit">Guardar Cambios</button>
     </form>
     <a href="{{ url_for('ideas') }}">Volver</a>

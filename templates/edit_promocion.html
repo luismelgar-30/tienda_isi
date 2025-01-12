@@ -7,64 +7,64 @@
     <title>Editar Descuento</title>
     <script>
         function validateForm() {
-            const nombre = document.getElementById('nombre').value;
-            const descripcion = document.getElementById('descripcion').value;
-            let valor = document.getElementById('valor').value;
+            const nombre = document.getElementById('nombre').value.trim();
+            let valor = document.getElementById('valor').value.trim();
 
-            // Validaciones generales
-            const hasRepeatedChars = (str) => /(.)\1\1/.test(str);
-            const hasSigns = (str) => /[^a-zA-Z0-9\s]/.test(str);
-            const hasNumbers = (str) => /\d/.test(str);
-            const hasLetters = (str) => /[a-zA-Z]/.test(str);
-
-            if (hasRepeatedChars(nombre) || hasRepeatedChars(descripcion)) {
-                alert('No se permiten tres letras repetidas consecutivas');
-                return false;
-            }
-            // Validar el valor
-            const percentagePattern = /^\d+(\.\d+)?%$/;
-            const numberPattern = /^\d+(\.\d+)?$/;
-            if (!percentagePattern.test(valor) && !numberPattern.test(valor)) {
-                alert('El valor debe ser un número o un porcentaje (e.g., 15 o 15%)');
+            // Validación para el campo nombre
+            const nombrePattern = /^Descuento de \d+%$/;
+            if (!nombrePattern.test(nombre)) {
+                alert('El nombre debe seguir el formato "Descuento de XX%", donde XX es un número.');
                 return false;
             }
 
-            // Remover % para la validación numérica
-            if (valor.endsWith('%')) {
-                valor = valor.slice(0, -1);
-            }
-
-            if (isNaN(valor)) {
-                alert('El valor debe ser un número');
+            // Validación para el campo valor
+            const valorPattern = /^(0\.\d+|0\.[0-9][0-9]?)$/; // Acepta valores como "0.05" hasta "0.90"
+            if (!valorPattern.test(valor) || parseFloat(valor) > 0.90) {
+                alert('El valor debe ser un número entre 0.05 y 0.90.');
                 return false;
             }
 
             return true;
         }
+
+        function closeAndRefresh() {
+            // Cierra la ventana emergente (modal)
+            const modal = document.getElementById('modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+
+            // Actualiza la ventana original
+            if (window.opener && !window.opener.closed) {
+                window.opener.location.reload();
+            }
+        }
     </script>
 </head>
 <body>
-    <div class="container">
-        <h2>Editar Descuento</h2>
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-          {% endif %}
-        {% endwith %}
-        <form action="{{ url_for('editar_promocion', id_promocion=promocion[0]) }}" method="post" onsubmit="return validateForm()">
-            <label for="nombre">Nombre:</label>
-            <input type="text" id="nombre" name="nombre" value="{{ promocion[1] }}" required><br><br>
-            <label for="valor">Valor:</label>
-            <input type="text" id="valor" name="valor" value="{{ promocion[2] }}" required><br><br>
-            <input type="submit" value="Actualizar">
-        </form>
-        
-        <br>
-        <a href="{{ url_for('promocion') }}">Lista de Descuentos</a>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('modal').style.display='none'">&times;</span>
+            <h2>Editar Descuento</h2>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul>
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+            <form action="{{ url_for('editar_promocion', id_promocion=promocion[0]) }}" method="post" onsubmit="return validateForm()">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" value="{{ promocion[1] }}" required><br><br>
+                <label for="valor">Valor:</label>
+                <input type="text" id="valor" name="valor" value="{{ promocion[2] }}" required><br><br>
+                <input type="submit" value="Actualizar" onclick="closeAndRefresh()">
+            </form>
+        </div>
     </div>
+
+    <a href="{{ url_for('promocion') }}">Lista de Descuentos</a>
 </body>
 </html>

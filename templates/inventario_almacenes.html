@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Inventario de Almacenes</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Inventario de Almacenes</h2>
+
+        <!-- Formulario de búsqueda -->
+        <form method="get" action="{{ url_for('inventario_almacen') }}">
+            <input type="text" name="search_query" value="{{ search_query }}" placeholder="Buscar...">
+            
+            <!-- Menú desplegable para seleccionar el campo de búsqueda -->
+            <select name="search_criteria">
+                <option value="id_inventario_almacenes" {% if search_criteria == 'id_inventario_almacenes' %}selected{% endif %}>ID Inventario</option>
+                <option value="nombre_producto" {% if search_criteria == 'nombre_producto' %}selected{% endif %}>Nombre Producto</option>
+            </select>
+            
+            <button type="submit">Buscar</button>
+        </form>
+
+        <br>
+
+        <!-- Tabla de resultados -->
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Inventario</th>
+                    <th>ID Almacén</th>
+                    <th>Nombre Producto</th>
+                    <th>Cantidad en Stock</th>
+                    <th>Stock Mínimo</th>
+                    <th>Stock Máximo</th>
+                    <th>Última Actualización</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventario_almacen %}
+                <tr>
+                    <td>{{ item[0] }}</td> <!-- ID Inventario -->
+                    <td>{{ item[1] }}</td> <!-- ID Almacén -->
+                    <td>{{ item[2] }}</td> <!-- Nombre Producto -->
+                    <td>{{ item[3] }}</td> <!-- Cantidad en Stock -->
+                    <td>{{ item[4] }}</td> <!-- Stock Mínimo -->
+                    <td>{{ item[5] }}</td> <!-- Stock Máximo -->
+                    <td>{{ item[6] }}</td> <!-- Última Actualización -->
+                    <td>
+                        <a class="button-link baa" href="{{ url_for('edit', id_inventario_almacenes=item[0]) }}" aria-label="Editar inventario">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                        <form action="{{ url_for('delete', id_inventario_almacenes=item[0]) }}" method="post" style="display:inline;">
+                            <button type="submit" class="button-link bee" onclick="return confirm('¿Estás seguro de que deseas eliminar este inventario?');" aria-label="Eliminar inventario">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Controles de paginación -->
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('inventario_almacen', page=page-1, search_query=search_query, search_criteria=search_criteria, per_page=per_page) }}">« Anterior</a>
+            {% endif %}
+            {% for p in range(1, total_pages + 1) %}
+                <a href="{{ url_for('inventario_almacen', page=p, search_query=search_query, search_criteria=search_criteria, per_page=per_page) }}" {% if p == page %}class="active"{% endif %}>{{ p }}</a>
+            {% endfor %}
+            {% if page < total_pages %}
+                <a href="{{ url_for('inventario_almacen', page=page+1, search_query=search_query, search_criteria=search_criteria, per_page=per_page) }}">Siguiente »</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Facturas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <br>
+    <header>
+        <h1 style="text-align: center;">Lista de Facturas</h1>
+    </header><br>
+    <form method="GET" action="{{ url_for('facturas') }}">
+        <input type="text" name="search" id="searchInput" placeholder="Buscar..." value="{{ search_query }}">
+        <select id="searchDropdown" onchange="updateSearch()">
+            <option value="">Id Factura</option>
+            <option value="nombre_cliente">Empleado</option>
+            <option value="correo">Documento</option>
+            <option value="asunto">Id pedido</option>
+            <option value="estado">Producto</option>
+        </select>
+        <button type="submit">Buscar</button>
+    </form><br>
+    <a style="padding: 10px 15px; font-size: 16px;  width: auto; max-width: 100px;" class="button-link ing" href="{{ url_for('index_factura') }}">Crear nueva Factura</a>
+    <a href="http://127.0.0.1:5010/pedidos">
+        <button type="button">Ir a Pedidos</button>
+    </a>
+    <br>
+<br>
+    <main>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Factura</th>
+                    <th>CAI</th>
+                    <th>Empleado</th>
+                    <th>Cliente</th>
+                    <th>ID Pedido</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                    <th>Impuesto</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for factura in facturas %}
+                <tr>
+                    <td>{{ factura[0] }}</td>
+                    <td>{{ factura[1] }}</td>
+                    <td>{{ factura[2] }}</td>
+                    <td>{{ factura[3] }}</td>
+                    <td>{{ factura[4] }}</td>
+                    <td>{{ factura[5] }}</td>
+                    <td>{{ factura[6] }}</td>
+                    <td>{{ factura[7] }}</td>
+                    <td>{{ factura[8] }}</td>
+                    <td>{{ factura[9] }}</td>
+                    <td>{{ factura[10] }}</td>
+                    <td>
+                        <a class="button-link baa"href="{{ url_for('edit_factura', id_factura=factura[0]) }}">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                        <a class="button-link bee" href="{{ url_for('eliminar_factura', id_factura=factura[0]) }}" onclick="return confirm('¿Estás seguro de que deseas eliminar este detalle?');">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                        
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            {% if page > 1 %}
+            <a href="{{ url_for('facturas', page=page-1, per_page=per_page) }}">Anterior</a>
+            {% endif %}
+            {% if page < total_pages %}
+            <a href="{{ url_for('facturas', page=page+1, per_page=per_page) }}">Siguiente</a>
+            {% endif %}
+        </div>
+    </main>
+
+</body>
+</html>

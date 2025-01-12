@@ -12,6 +12,7 @@
 
     <!-- Formulario de búsqueda -->
     <form method="GET" action="{{ url_for('capacitaciones') }}" id="searchForm">
+        {% if session.get('permiso_buscador_4') == 1 %}
         <div class="search-container">
             <label for="search_criteria" class="search-label">Buscar por:</label>
             <select name="search_criteria" id="search_criteria" class="search-criteria">
@@ -35,13 +36,20 @@
             </select>
             <input type="hidden" name="page" id="currentPage" value="{{ page }}">
         </div>
-    
+        {% endif %}
     </form>
 
     <br>
+    {% if session.get('permiso_crear_4') == 1 %}
     <a class="button-link ing" href="{{ url_for('index_capacitacion') }}">Ingresar Datos de Capacitación</a>
-    <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
-
+    {% endif %}
+    <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+    {% if session.get('permiso_exportar_excel_4') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_excel') }}">Descargar Lista en Excel</a>
+    {% endif %}
+    {% if session.get('permiso_exportar_pdf_4') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+    {% endif %}
     <table>
         <tr>
             <th>ID Capacitacion</th>
@@ -61,11 +69,16 @@
             <td>{{ capacitacion[4] }}</td>
             <td>{{ capacitacion[5] }}</td>
             <td>
+                {% if session.get('permiso_editar_4') == 1 %}
                 <a class="button-link baa" href="#" onclick="openEditWindow('{{ url_for('edit_capacitacion', id_capacitacion=capacitacion[0]) }}'); return false;">
                     Editar <i class='bx bx-edit' style='color:#000000'></i>
                 </a>
+                {% endif %}
+                {% if session.get('permiso_eliminar_4') == 1 %}
                 <a class="button-link bee" href="{{ url_for('eliminar_capacitacion', id_capacitacion=capacitacion[0]) }}">
-                    Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                    Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i>
+                </a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}

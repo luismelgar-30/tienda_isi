@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ver Pedido</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #dcdcdc; /* Gris claro para el fondo de la página */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400vh;
+        }
+        .container {
+            background-color: #dcdcdc;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 8000px;
+        }
+        h1, h2, h3 {
+            color: #333;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #788199;
+            color: white;
+        }
+     
+        total-column {
+            display: none; /* Oculta la columna "Total" */
+        }
+        .subtotal-column {
+            display: none;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            background-color: #dcdcdc;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        a:hover {
+            background-color: #45a049;
+        }
+        #download-pdf {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            background-color: green;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+        }
+        #download-pdf:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        function generarNumeroFactura() {
+            const primeraParte = `00${Math.floor(Math.random() * 4) + 1}`;
+            const segundaParte = `0${Math.floor(Math.random() * 3) + 1}0`;
+            const terceraParte = `0${Math.floor(Math.random() * 2)}`;
+            const cuartaParte = `${Math.floor(Math.random() * 10)}0${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}0${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 10)}`;
+            return `${primeraParte} ${segundaParte} ${terceraParte} ${cuartaParte}`;
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+
+            // Ocultar el botón antes de generar el PDF
+            const button = document.getElementById('download-pdf');
+            button.style.display = 'none';
+
+            const container = document.querySelector('.container');
+            html2canvas(container, {
+                backgroundColor: '#dcdcdc'  // Gris claro para el fondo del PDF
+            }).then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                // Agrega la imagen principal del contenido HTML
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+                // Obtener la fecha y hora actual
+                const currentDate = new Date();
+                const formattedDate = currentDate.toLocaleDateString('es-ES');
+                const formattedTime = currentDate.toLocaleTimeString('es-ES');
+
+                // Añadir la fecha y la hora en la esquina superior derecha
+                pdf.setFontSize(10);
+                pdf.text(`Fecha y hora: ${formattedDate} ${formattedTime}`, pdfWidth - 60, 10);
+
+                // Descargar el PDF
+                pdf.save('pedido.pdf');
+
+                // Mostrar el botón nuevamente después de generar el PDF
+                button.style.display = 'block';
+            });
+        }
+
+     
+
+        function calcularTotales() {
+            let total = 0;
+            let subtotal = 0;
+
+            // Sumar totales
+            const totales = document.querySelectorAll('.total');
+            totales.forEach(function(item) {
+                total += parseFloat(item.textContent);
+            });
+
+            // Sumar subtotales
+            const subtotales = document.querySelectorAll('.subtotal');
+            subtotales.forEach(function(item) {
+                subtotal += parseFloat(item.textContent);
+            });
+
+            // Calcular impuestos (total - subtotal)
+            let impuestos = total - subtotal;
+
+            // Actualizar el DOM con los valores calculados
+            document.getElementById('sumaTotal').textContent = total.toLocaleString('es-HN', {
+                style: 'currency',
+                currency: 'HNL'
+            });
+
+            document.getElementById('sumaSubTotal').textContent = subtotal.toLocaleString('es-HN', {
+                style: 'currency',
+                currency: 'HNL'
+            });
+
+            document.getElementById('sumaImpuestos').textContent = impuestos.toLocaleString('es-HN', {
+                style: 'currency',
+                currency: 'HNL'
+            });
+        }
+
+        // Llama a la función cuando se cargue la página
+        window.onload = calcularTotales;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center;"><strong>Factura:</strong> {{ numero_factura }}</h1>
+        <div>
+            <h3 style="text-align: center;">Cai:</h3>
+            <p style="text-align: center;"><strong>{{ sar['cai'] }}</strong></p>
+            <!-- otros campos del pedido -->
+        </div>
+        
+        <div>
+            <h3 style="text-align: center;">RTN:</h3>
+            <p style="text-align: center;"><strong>{{ sar['rtn'] }}</strong></p>
+            <!-- otros campos del pedido -->
+        </div>
+      
+            <h2>Detalles del Pedido #{{ pedido["id_pedido"] }}</h2>
+            
+            <br>
+            <h3 style="text-align: left;">Rango Inicial: {{ sar['rango_inicial']}}</h3>
+            <h3 style="text-align: left;">Rango Final: {{ sar['rango_final']  }}</h3>
+            <h3 style="text-align: left;">Nombre de cliente: {{ cliente_info['nombre'] }}</h3>
+            <h3 style="text-align: left;">Apellido del cliente: {{ cliente_info['apellido'] }}</h3>
+            <h3 style="text-align: left;">Fecha de pedido: {{ pedido['fecha_pedido'] }}</h3>
+            <h3 style="text-align: left;">Fecha de Vencimiento: {{ sar['fecha_vencimiento'] }}</h3>
+            <h3 style="text-align: left;">Metodo de pago: {{ pedido['metodo_pago'] }}</h3>
+            <h3 style="text-align: left;">Nombre de Empleado: {{ empleado_info['nombre'] }}</h3>
+            <h3 style="text-align: left;">Apellido de Empleado: {{ empleado_info['apellido'] }}</h3>
+      
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Detalle</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in detalles %}
+                <tr>
+                    <td>{{ detalle[0] }}</td>
+                    <td>{{ detalle[2] }}</td>
+                    <td>{{ detalle[3] }}</td>
+                    <td>{{ detalle[4] }}</td>
+                    <td class="subtotal subtotal-column">{{ detalle[6] }}</td>
+                    <td class="total subtotal-column">{{ detalle[5] }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3" style="text-align: right; font-weight: bold;">SubTotal:</td>
+                    <td id="sumaSubTotal" style="font-weight: bold;"></td>
+                </tr>
+         
+                <tr>
+                    <td colspan="3" style="text-align: right; font-weight: bold;">TOTAL:</td>
+                    <td id="sumaTotal" style="font-weight: bold;"></td>
+                </tr>
+            </tbody>
+        </table>
+        <h3 style="text-align: left;">Tegucigalpa Colonia Los Llanos, 5, Calle 13</h3>
+        <h3 style="text-align: left;">Sucursal: {{ sucursal_info  }}</h3>
+        <h3 style="text-align: left;">Llamanos: 3346-7880</h3>
+        <h3 style="text-align: left;">Grupo2@gmail.com</h3>
+        <h3 style="text-align: right;">Garantia de: {{ garantia[0] }}</h3>
+        <h2 style="text-align: center;">"Te esperamos pronto"</h2>
+        <!-- Botón para descargar el PDF -->
+        <div id="download-pdf" onclick="downloadPDF()">Factura en PDF</div>
+    </div>
+
+    
+</body>
+</html>

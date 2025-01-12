@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar pantallas</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function validarFormulario() {
+            return true; // Aquí podrías agregar validación extra si es necesario
+        }
+
+        function cerrarYRefrescar() {
+            if (window.opener) {
+                window.opener.location.reload(); // Refrescar la ventana original
+            }
+            window.close(); // Cerrar la ventana actual
+        }
+
+        function manejarEnvio(event) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado del formulario
+
+            const formulario = document.getElementById('editForm');
+            const esValido = validarFormulario();
+
+            if (esValido) {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', formulario.action, true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                
+                // Serializar los datos del formulario
+                const formData = new FormData(formulario);
+                const parametros = new URLSearchParams(formData).toString();
+
+                xhr.send(parametros);
+
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        cerrarYRefrescar(); // Cerrar la ventana emergente y actualizar la ventana principal
+                    } else {
+                        alert('Error al actualizar el permiso.');
+                    }
+                };
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            window.onunload = function() {
+                if (window.opener) {
+                    window.opener.location.reload(); // Actualizar la ventana principal
+                }
+            };
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Editar Permiso</h2>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        <form id="editForm" action="{{ url_for('edit_pantallas', id_pantalla=pantallas[0]) }}" method="post" onsubmit="manejarEnvio(event)">
+          
+          <!-- Hidden field for id_rol -->
+          <input type="hidden" name="id_rol" value="{{ pantallas[1] }}">
+
+          <fieldset>
+            <br>
+            <legend>Permisos Para Pantallas:</legend>
+
+            <label for="permiso_producto">Producto:</label>
+            <input type="checkbox" id="permiso_producto" name="permiso_producto" {% if pantallas[2] %}checked{% endif %}><br><br>
+
+            <label for="permiso_empleado">Empleado:</label>
+            <input type="checkbox" id="permiso_empleado" name="permiso_empleado" {% if pantallas[3] %}checked{% endif %}><br><br>
+
+            <label for="permiso_inventario">Inventario:</label>
+            <input type="checkbox" id="permiso_inventario" name="permiso_inventario" {% if pantallas[4] %}checked{% endif %}><br><br>
+
+            <label for="permiso_capacitacion">Capacitación:</label>
+            <input type="checkbox" id="permiso_capacitacion" name="permiso_capacitacion" {% if pantallas[5] %}checked{% endif %}><br><br>
+
+            <label for="permiso_cliente">Cliente:</label>
+            <input type="checkbox" id="permiso_cliente" name="permiso_cliente" {% if pantallas[6] %}checked{% endif %}><br><br>
+
+            <label for="permiso_proveedor">Proveedor:</label>
+            <input type="checkbox" id="permiso_proveedor" name="permiso_proveedor" {% if pantallas[7] %}checked{% endif %}><br><br>
+
+            <label for="permiso_sucursal">Sucursal:</label>
+            <input type="checkbox" id="permiso_sucursal" name="permiso_sucursal" {% if pantallas[8] %}checked{% endif %}><br><br>
+
+            <label for="permiso_equipo">Equipo:</label>
+            <input type="checkbox" id="permiso_equipo" name="permiso_equipo" {% if pantallas[9] %}checked{% endif %}><br><br>
+
+            <label for="permiso_pedido_cliente">Pedido Cliente:</label>
+            <input type="checkbox" id="permiso_pedido_cliente" name="permiso_pedido_cliente" {% if pantallas[10] %}checked{% endif %}><br><br>
+
+            <label for="permiso_pedido_proveedor">Pedido Proveedor:</label>
+            <input type="checkbox" id="permiso_pedido_proveedor" name="permiso_pedido_proveedor" {% if pantallas[11] %}checked{% endif %}><br><br>
+
+            <label for="permiso_devolucion_venta">Devolución Venta:</label>
+            <input type="checkbox" id="permiso_devolucion_venta" name="permiso_devolucion_venta" {% if pantallas[12] %}checked{% endif %}><br><br>
+
+            <label for="permiso_devolucion_compra">Devolución Compra:</label>
+            <input type="checkbox" id="permiso_devolucion_compra" name="permiso_devolucion_compra" {% if pantallas[13] %}checked{% endif %}><br><br>
+
+            <label for="permiso_promocion">Promoción:</label>
+            <input type="checkbox" id="permiso_promocion" name="permiso_promocion" {% if pantallas[14] %}checked{% endif %}><br><br>
+
+            <label for="permiso_mantenimiento">Mantenimiento:</label>
+            <input type="checkbox" id="permiso_mantenimiento" name="permiso_mantenimiento" {% if pantallas[15] %}checked{% endif %}><br><br>
+
+            <label for="permiso_transportista">Transportista:</label>
+            <input type="checkbox" id="permiso_transportista" name="permiso_transportista" {% if pantallas[16] %}checked{% endif %}><br><br>
+
+            <label for="permiso_sar">SAR:</label>
+            <input type="checkbox" id="permiso_sar" name="permiso_sar" {% if pantallas[17] %}checked{% endif %}><br><br>
+
+            <label for="permiso_usuario">Usuario:</label>
+            <input type="checkbox" id="permiso_usuario" name="permiso_usuario" {% if pantallas[18] %}checked{% endif %}><br><br>
+
+            <label for="permiso_categoria">Categoría:</label>
+            <input type="checkbox" id="permiso_categoria" name="permiso_categoria" {% if pantallas[19] %}checked{% endif %}><br><br>
+
+            <label for="permiso_distribucion">Distribución:</label>
+            <input type="checkbox" id="permiso_distribucion" name="permiso_distribucion" {% if pantallas[20] %}checked{% endif %}><br><br>
+
+            <label for="permiso_puesto_trabajo">Puesto de Trabajo:</label>
+            <input type="checkbox" id="permiso_puesto_trabajo" name="permiso_puesto_trabajo" {% if pantallas[21] %}checked{% endif %}><br><br>
+
+            <label for="permiso_impuesto">Impuesto:</label>
+            <input type="checkbox" id="permiso_impuesto" name="permiso_impuesto" {% if pantallas[22] %}checked{% endif %}><br><br>
+
+            <label for="permiso_almacen">Almacén:</label>
+            <input type="checkbox" id="permiso_almacen" name="permiso_almacen" {% if pantallas[23] %}checked{% endif %}><br><br>
+          </fieldset>
+
+          <input type="submit" value="Actualizar">
+        </form>
+
+        <br>
+        <a href="javascript:void(0);" onclick="cerrarYRefrescar()">Lista de pantallas</a>
+    </div>
+</body>
+</html>

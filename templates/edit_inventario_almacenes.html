@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Inventario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+    <h1>Editar Inventario</h1>
+    <form method="POST">
+        <label for="id_producto">Producto:</label>
+        <select name="id_producto" id="id_producto" required>
+            {% for producto in productos %}
+                <option value="{{ producto[0] }}" {% if producto[0] == inventario[2] %}selected{% endif %}>{{ producto[1] }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="id_almacen">Almacén:</label>
+        <select name="id_almacen" id="id_almacen" required>
+            {% for almacen in almacenes %}
+                <option value="{{ almacen[0] }}" {% if almacen[0] == inventario[1] %}selected{% endif %}>{{ almacen[1] }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="cantidad_en_stock">Cantidad en Stock:</label>
+        <input type="number" name="cantidad_en_stock" id="cantidad_en_stock" value="{{ inventario[3] }}" required>
+
+        <label for="stock_minimo">Stock Mínimo:</label>
+        <input type="number" name="stock_minimo" id="stock_minimo" value="{{ inventario[4] }}" required>
+
+        <label for="stock_maximo">Stock Máximo:</label>
+        <input type="number" name="stock_maximo" id="stock_maximo" value="{{ inventario[5] }}" required>
+
+        <button type="submit">Guardar Cambios</button>
+    </form>
+    <a href="{{ url_for('inventario_almacen') }}">Volver al Inventario</a>
+</div>
+</body>
+</html>

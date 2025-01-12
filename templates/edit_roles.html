@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar roles</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        // Función para habilitar o deshabilitar el botón de Guardar Cambios y otros botones según los permisos
+        function toggleButtons() {
+            const crearCheckbox = document.getElementById("permisoCrear");
+            const saveButton = document.getElementById("saveButton");
+            
+            // Lista de botones que se deben desactivar si no se tiene el permiso de creación
+            const botones = document.querySelectorAll(".boton-accion");
+
+            // Si el checkbox de "Crear" está marcado, habilita los botones, de lo contrario, deshabilítalos
+            const enabled = crearCheckbox.checked;
+            botones.forEach(boton => boton.disabled = !enabled);
+            saveButton.disabled = !enabled;
+        }
+
+        // Llama a toggleButtons al cargar la página para configurar el estado inicial
+        document.addEventListener("DOMContentLoaded", toggleButtons);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Editar roles</h1>
+        <form id="editForm" method="POST" action="{{ url_for('edit_roles', id_rol=roles[0]) }}">
+            <label>Nombre del rol:</label>
+            <input type="text" name="nombre_rol" id="nombre_rol" value="{{ roles[1] }}" required><br><br>
+            
+            <label>Descripción:</label>
+            <input type="text" name="Descripcion" id="Descripcion" value="{{ roles[2] }}" required><br><br>
+
+            <button type="submit" id="saveButton" class="boton-accion">Guardar Cambios</button>
+        </form>
+        <br>
+        <a href="#" onclick="closeWindow()">Cerrar ventana</a>
+    </div>
+    
+</body>
+</html>

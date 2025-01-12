@@ -5,6 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Editar Sucursal</title>
+    <script>
+        function validarFormulario() {
+            let mensajesError = [];
+
+            // Validación del campo Sucursal (correspondiente al campo Ciudad en la base de datos)
+            const sucursal = document.getElementById("ciudad").value;
+            const regexSucursal = /^(?!.*([a-zA-Z])\1{2})[a-zA-Z\s]{10,20}$/;
+            if (!regexSucursal.test(sucursal)) {
+                mensajesError.push("El campo 'Sucursal' solo puede contener letras y espacios, no debe tener más de dos letras consecutivas iguales, y debe tener entre 10 y 20 caracteres.");
+            }
+
+            // Validación del campo Teléfono
+            const telefono = document.getElementById("telefono").value;
+            const regexTelefono = /^[23789]\d{7}$/;
+            if (!regexTelefono.test(telefono)) {
+                mensajesError.push("El campo 'Teléfono' solo puede contener números, debe tener 8 dígitos y comenzar con 2, 3, 7, 8 o 9.");
+            }
+
+            // Mostrar alertas si hay errores
+            if (mensajesError.length > 0) {
+                alert(mensajesError.join("\n"));
+                return false; // Evita el envío del formulario
+            }
+
+            return true; // Si todo está correcto, enviar el formulario
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                // Realizar la solicitud de envío del formulario usando AJAX
+                const form = event.target;
+                const formData = new FormData(form);
+                const request = new XMLHttpRequest();
+                request.open('POST', form.action, true);
+    
+                request.onload = function() {
+                    if (request.status === 200) {
+                        // Si la actualización fue exitosa, cierra la ventana
+                        window.close();
+                    } else {
+                        alert('Error al actualizar el producto');
+                    }
+                };
+                
+                request.send(formData);
+            });
+        });
+    </script>
+    
 </head>
 <body>
     <div class="container">
@@ -18,7 +68,7 @@
             </ul>
           {% endif %}
         {% endwith %}
-        <form action="{{ url_for('edit_sucursal', id_sucursal=sucursal[0]) }}" method="post">
+        <form action="{{ url_for('edit_sucursal', id_sucursal=sucursal[0]) }}" method="post" onsubmit="return validarFormulario()">
            <label for="ciudad">Sucursal:</label>
            <input type="text" id="ciudad" name="ciudad" value="{{ sucursal[1] }}" required><br><br>
            <label for="telefono">Teléfono:</label>

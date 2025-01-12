@@ -5,15 +5,60 @@
     <title>Mantenimientos</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function openWindow(url) {
+            window.open(url, 'Ventana', 'width=800,height=600');
+        }
+    </script>
 </head>
 <body>
     <div class="container">
-        <h1>Lista de Mantenimientos</h1>
-        <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
-        <form method="GET" action="{{ url_for('mantenimientos') }}">
-            <input type="text" name="search" placeholder="Buscar" value="{{ search_query }}">
-            <button class="button-link ing" type="submit">Buscar</button>
+        <h2>Mantenimientos</h2>
+
+        <!-- Formulario de búsqueda -->
+        <form method="get" action="{{ url_for('mantenimientos') }}">
+            {% if session.get('permiso_buscador_14') == 1 %}
+            <input type="text" name="search_query" placeholder="Buscar..." value="{{ search_query }}">
+            
+            <!-- Menú desplegable para seleccionar el campo de búsqueda -->
+            <select name="search_criteria">
+                <option value="id_equipo" {% if search_criteria == 'id_equipo' %}selected{% endif %}>ID Equipo</option>
+                <option value="fecha" {% if search_criteria == 'fecha' %}selected{% endif %}>Fecha</option>
+                <option value="tipo" {% if search_criteria == 'tipo' %}selected{% endif %}>Tipo</option>
+                <option value="estado" {% if search_criteria == 'estado' %}selected{% endif %}>Estado</option>
+            </select>
+        
+            <button type="submit">Buscar</button>
         </form>
+
+        <br>
+        <!-- Formulario para seleccionar el número de elementos por página -->
+        <form method="get" action="{{ url_for('mantenimientos') }}">
+           
+            <label for="per_page">Elementos por página:</label>
+            <select name="per_page" id="per_page" onchange="this.form.submit()">
+                <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+            </select>
+            <input type="hidden" name="search_query" value="{{ search_query }}">
+            <input type="hidden" name="search_criteria" value="{{ search_criteria }}">
+            {% endif %}
+        </form>
+
+        <br>
+        {% if session.get('permiso_crear_14') == 1 %}
+        <a class="button-link ing" href="{{ url_for('index_mantenimiento') }}">Ingresar Nuevo</a>
+        {% endif %}
+        <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+        {% if session.get('permiso_exportar_excel_14') == 1 %}
+        <a class="button-link ing" href="{{ url_for('export_mantenimiento') }}">Descargar Lista en Excel</a>
+        {% endif %}
+        {% if session.get('permiso_exportar_pdf_14') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+        {% endif %}
+        
+        <!-- Tabla de resultados -->
         <table>
             <thead>
                 <tr>
@@ -38,23 +83,30 @@
                     <td>{{ mantenimiento[5] }}</td>
                     <td>{{ mantenimiento[6] }}</td>
                     <td>
-                        <a class="button-link baa" href="{{ url_for('edit_mantenimiento', id_mantenimiento=mantenimiento[0]) }}">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                        {% if session.get('permiso_editar_14') == 1 %}
+                        <a class="button-link baa" href="#" onclick="openWindow('{{ url_for('edit_mantenimiento', id_mantenimiento=mantenimiento[0]) }}')">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                        {% endif %}
+                        {% if session.get('permiso_eliminar_14') == 1 %}
                         <a class="button-link bee" href="{{ url_for('eliminar_mantenimiento', id_mantenimiento=mantenimiento[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- Controles de paginación -->
         <div class="pagination">
             {% if page > 1 %}
-                <a href="{{ url_for('mantenimientos', page=page-1, search=search_query) }}">Anterior</a>
+            <a href="{{ url_for('mantenimientos', search_criteria=search_criteria, search_query=search_query, page=page-1, per_page=per_page) }}">Anterior</a>
             {% endif %}
-            <span>Página {{ page }} de {{ total_pages }}</span>
+            {% for p in range(1, total_pages + 1) %}
+            <a href="{{ url_for('mantenimientos', search_criteria=search_criteria, search_query=search_query, page=p, per_page=per_page) }}" {% if p == page %}class="active"{% endif %}>{{ p }}</a>
+            {% endfor %}
             {% if page < total_pages %}
-                <a href="{{ url_for('mantenimientos', page=page+1, search=search_query) }}">Siguiente</a>
+            <a href="{{ url_for('mantenimientos', search_criteria=search_criteria, search_query=search_query, page=page+1, per_page=per_page) }}">Siguiente</a>
             {% endif %}
         </div>
-        <a class="button-link ing" href="{{ url_for('index_mantenimiento') }}">Regresar</a>
     </div>
 </body>
 </html>

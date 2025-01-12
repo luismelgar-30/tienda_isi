@@ -27,7 +27,7 @@
             <input type="text" name="Ciudad" value="{{ proveedores[6] }}" required>
             <label>Tipo:</label>
             <select name="tipo" required>
-                <option value="Numero de Identidad" {% if proveedores[7] == 'Numero de Identidad' %}selected{% endif %}>Número de Identidad</option>
+                <option value="DNI" {% if proveedores[7] == 'DNI' %}selected{% endif %}>DNI</option>
                 <option value="Pasaporte" {% if proveedores[7] == 'Pasaporte' %}selected{% endif %}>Pasaporte</option>
                 <option value="RTN" {% if proveedores[7] == 'RTN' %}selected{% endif %}>RTN</option>
             </select>

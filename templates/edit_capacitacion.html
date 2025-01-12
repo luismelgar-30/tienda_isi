@@ -8,6 +8,15 @@
 <body>
     <div class="container">
         <h1>Editar Capacitación</h1>
+        {% if errors %}
+            <div class="error-messages">
+                <ul>
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
         <form id="editForm" method="POST" action="{{ url_for('edit_capacitacion', id_capacitacion=capacitacion[0]) }}">
             <label>Empleado:</label>
             <select name="id_empleado" required>
@@ -15,19 +24,26 @@
                     <option value="{{ empleado[0] }}" {% if empleado[0] == capacitacion[1] %}selected{% endif %}>{{ empleado[1] }}</option>
                 {% endfor %}
             </select><br><br>
-            
+
             <label>Tema:</label>
             <input type="text" name="tema" value="{{ capacitacion[2] }}" required><br><br>
-            
+
             <label for="fecha_capacitacion">Fecha y Hora de Capacitación:</label>
             <input type="datetime-local" id="fecha_capacitacion" name="fecha_capacitacion" required value="{{ capacitacion[3].strftime('%Y-%m-%dT%H:%M') }}">
+
+            <label for="duracion">Duración:</label>
+            <select id="duracion" name="duracion" required>
+                <option value="" disabled>Selecciona la duración</option>
+                <option value="1 semana" {% if capacitacion[4] == '1 semana' %}selected{% endif %}>1 semana</option>
+                <option value="3 semanas" {% if capacitacion[4] == '3 semanas' %}selected{% endif %}>3 semanas</option>
+                <option value="1 mes" {% if capacitacion[4] == '1 mes' %}selected{% endif %}>1 mes</option>
+                <option value="2 meses" {% if capacitacion[4] == '2 meses' %}selected{% endif %}>2 meses</option>
+            </select><br><br>
             
-            <label>Duración:</label>
-            <input type="text" name="duracion" value="{{ capacitacion[4] }}" required><br><br>
-            
+
             <label>Resultado:</label>
             <input type="text" name="resultado" value="{{ capacitacion[5] }}" required><br><br>
-            
+
             <button type="submit">Guardar Cambios</button>
         </form>
         <br>
@@ -40,27 +56,61 @@
         }
 
         document.getElementById('editForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-    
-            var formData = new FormData(this);
-    
-            fetch(this.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    if (window.opener) {
-                        window.opener.location.reload();
+            var tema = this.elements['tema'].value;
+            var duracion = this.elements['duracion'].value;
+            var resultado = this.elements['resultado'].value;
+
+            var errors = [];
+
+            // Validación del tema
+            if (tema.length < 3 || tema.length > 40) {
+                errors.push('El tema debe tener entre 3 y 20 caracteres.');
+            }
+            if (!/^[a-zA-Z\s]+$/.test(tema)) {
+                errors.push('El tema solo puede contener letras y espacios.');
+            }
+
+
+            // Validación de resultado
+            if (!/^\d+$/.test(resultado)) {
+                errors.push('El resultado debe ser un número entero.');
+            }
+
+            // Validación de fecha
+            var fechaCapacitacion = new Date(this.elements['fecha_capacitacion'].value);
+            var ahora = new Date();
+            if (fechaCapacitacion < ahora) {
+                errors.push('La fecha de capacitación no puede ser en el pasado.');
+            }
+
+            // Mostrar errores
+            if (errors.length > 0) {
+                alert(errors.join('\n'));
+                event.preventDefault(); // Evitar el envío del formulario
+            } else {
+                // Si no hay errores, enviar el formulario
+                var formData = new FormData(this);
+
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        if (window.opener) {
+                            window.opener.location.reload(); // Recargar la ventana principal
+                        }
+                        closeWindow(); // Cerrar la ventana emergente
+                    } else {
+                        return response.text().then(text => {
+                            throw new Error(text);
+                        });
                     }
-                    closeWindow();
-                } else {
-                    throw new Error('Error al actualizar la capacitación');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                })
+                .catch(error => {
+                    alert('Error al actualizar la capacitación: ' + error.message);
+                });
+            }
         });
     </script>
 </body>

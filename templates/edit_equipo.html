@@ -9,34 +9,30 @@
     <div class="container">
         <h1>Editar Equipo</h1>
         <form action="{{ url_for('edit_equipo', id_equipo=equipo[0]) }}" method="POST">
+            <!-- Campo de solo lectura para ID del equipo -->
             <label for="id_equipo">ID del Equipo:</label>
             <input type="text" id="id_equipo" name="id_equipo" value="{{ equipo[0] }}" readonly>
-            
+
+            <!-- Campo manual para Tipo del equipo -->
             <label for="tipo">Tipo:</label>
-            <select id="tipo" name="tipo" required>
-                <option value="electrico" {% if equipo[1] == 'electrico' %}selected{% endif %}>Eléctrico</option>
-                <option value="mecanico" {% if equipo[1] == 'mecanico' %}selected{% endif %}>Mecánico</option>
-                <option value="automatico" {% if equipo[1] == 'automatico' %}selected{% endif %}>Automático</option>
-                <option value="no_automatico" {% if equipo[1] == 'no_automatico' %}selected{% endif %}>No Automático</option>
-            </select>
-            
+            <input type="text" id="tipo" name="tipo" value="{{ equipo[1] }}" required placeholder="Ingrese tipo de equipo">
+
+            <!-- Validación para Modelo: máximo 2 números, entre 4 y 10 letras -->
             <label for="modelo">Modelo:</label>
-            <select id="modelo" name="modelo" required>
-                <option value="nuevo" {% if equipo[2] == 'nuevo' %}selected{% endif %}>Nuevo</option>
-                <option value="viejo" {% if equipo[2] == 'viejo' %}selected{% endif %}>Viejo</option>
-            </select>
-            
+            <input type="text" id="modelo" name="modelo" value="{{ equipo[2] }}" required placeholder="Ingrese modelo" pattern="[A-Za-z]{4,10}\d{0,2}" title="Debe tener entre 4 y 10 letras y hasta 2 números al final">
+
+            <!-- Validación para Número de Serie: solo números y exactamente 7 dígitos -->
             <label for="numero_serie">Número de Serie:</label>
-            <input type="number" id="numero_serie" name="numero_serie" value="{{ equipo[3] }}" required min="0" max="9999" step="1" placeholder="1234" pattern="\d{4}">
-            
-            <label for="estado">Estado:</label>
-            <select id="estado" name="estado" required>
-                <option value="bueno" {% if equipo[4] == 'bueno' %}selected{% endif %}>Bueno</option>
-                <option value="medio" {% if equipo[4] == 'medio' %}selected{% endif %}>Medio</option>
-                <option value="malo" {% if equipo[4] == 'malo' %}selected{% endif %}>Malo</option>
-                <option value="en_reparacion" {% if equipo[4] == 'en_reparacion' %}selected{% endif %}>En Reparación</option>
-            </select>
-            
+            <input type="text" id="numero_serie" name="numero_serie" value="{{ equipo[3] }}" required placeholder="Ingrese número de serie" pattern="\d{7}" title="Debe tener exactamente 7 números">
+
+             <!-- Campo seleccionable para el estado del equipo -->
+             <label for="estado">Estado:</label>
+             <select id="estado" name="estado" required>
+                 <option value="Buen estado">Buen estado</option>
+                 <option value="Dañado">Dañado</option>
+                 <option value="Revisión">Revisión</option>
+             </select>
+             <br>
             <button type="submit">Actualizar Equipo</button>
         </form>
         <a href="{{ url_for('equipos') }}">Regresar</a>

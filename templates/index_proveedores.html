@@ -4,6 +4,69 @@
     <meta charset="UTF-8">
     <title>Ingrese el proveedor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function validarTelefono(event) {
+            const telefono = document.getElementById("Telefono").value;
+            const telefonoRegex = /^[3|7|8|9]\d{7}$/;
+    
+            // Validar que el teléfono cumpla con el patrón
+            if (!telefonoRegex.test(telefono)) {
+                alert("El número de teléfono debe comenzar con 3, 7, 8 o 9, seguido de 7 dígitos.");
+                event.preventDefault(); // Evitar el envío del formulario
+                return;
+            }
+    
+            // Validar que no se repita el mismo número después del segundo dígito
+            const segundoDigito = telefono[1];
+            for (let i = 2; i < telefono.length; i++) {
+                if (telefono[i] === segundoDigito) {
+                    alert("No se puede repetir el mismo número después del segundo dígito.");
+                    event.preventDefault(); // Evitar el envío del formulario
+                    return;
+                }
+            }
+            
+            // Validar que solo tenga dígitos
+            if (!/^\d{8}$/.test(telefono)) {
+                alert("El teléfono solo puede contener 8 dígitos.");
+                event.preventDefault(); // Evitar el envío del formulario
+            }
+        }
+    
+        function validarDocumento(event) {
+            const tipo = document.getElementById("Tipo").value;
+            const documento = document.getElementById("Documento").value;
+    
+            // Validar si el tipo es DNI
+            if (tipo === "DNI") {
+                const dniRegex = /^[01][0-8][0-2]\d{10}$/;
+    
+                if (!dniRegex.test(documento)) {
+                    alert("El DNI debe empezar con 0 o 1, el segundo dígito debe ser del 0 al 8, y el tercer dígito debe ser del 0 al 2.");
+                    event.preventDefault(); // Evitar el envío del formulario
+                    return;
+                }
+            }
+    
+            // Validar si el tipo es Pasaporte
+            if (tipo === "Pasaporte") {
+                const pasaporteRegex = /^[EDS]\d{8}$/;
+    
+                if (!pasaporteRegex.test(documento)) {
+                    alert("El pasaporte debe comenzar con E, D o S, seguido de 8 dígitos.");
+                    event.preventDefault(); // Evitar el envío del formulario
+                    return;
+                }
+    
+                if (documento.length !== 9) {
+                    alert("El pasaporte debe tener una longitud de 9 caracteres.");
+                    event.preventDefault(); // Evitar el envío del formulario
+                    return;
+                }
+            }
+        }
+    </script>
+    
 </head>
 <body>
     <div class="container">
@@ -17,7 +80,7 @@
             </ul>
           {% endif %}
         {% endwith %}
-        <form action="{{ url_for('submit') }}" method="post">
+        <form action="{{ url_for('submit') }}" method="post" onsubmit="validarTelefono(event); validarDocumento(event);">
             <label for="Nombre_del_proveedor">Nombre del proveedor:</label>
             <input type="text" id="Nombre_del_proveedor" name="Nombre_del_proveedor" required><br><br>
             
@@ -42,7 +105,7 @@
 
             <label for="Tipo">Tipo:</label>
             <select id="Tipo" name="Tipo" required>
-                <option value="Numero de Identidad">Número de Identidad</option>
+                <option value="DNI">DNI</option>
                 <option value="Pasaporte">Pasaporte</option>
                 <option value="RTN">RTN</option>
             </select><br><br>

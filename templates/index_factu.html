@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Agregar Factura</title>
+    <script>
+        function updateNumeroFactura() {
+            var idSar = document.getElementById('id_sar').value;
+            var numeroFacturaInput = document.getElementById('numero_factura');
+            
+            if (idSar) {
+                fetch(`/get_factura_format/${idSar}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        numeroFacturaInput.value = data;
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                numeroFacturaInput.value = '';
+            }
+        }
+
+        function validateFacturaInput() {
+            var numeroFacturaInput = document.getElementById('numero_factura');
+            var userInput = numeroFacturaInput.value.split('-').pop(); // Obtener la parte ingresada por el usuario
+            
+            if (userInput.length !== 8 || !/^\d{8}$/.test(userInput)) {
+                alert("Por favor, ingresa exactamente 8 dígitos en la parte final del número de factura.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Ingresar Factura</h2>
+        
+        <form action="{{ url_for('submit') }}" method="post" onsubmit="return validateFacturaInput()">
+          <label for="id_sar">ID SAR:</label>
+          <select id="id_sar" name="id_sar" onchange="updateNumeroFactura()" required>
+            <option value="" disabled selected>Elige el SAR</option> <!-- Opción agregada -->
+            {% for sar in sar_list %}
+                <option value="{{ sar }}">{{ sar }}</option>
+            {% endfor %}
+          </select><br><br>
+          <label for="numero_factura">Número Factura:</label>
+          <input type="text" id="numero_factura" name="numero_factura" maxlength="19" required pattern="\d{3}-\d{3}-\d{2}-\d{8}" title="El formato debe ser XXX-XXX-XX-XXXXXXXX"><br><br>
+          <button type="submit">Agregar Factura</button>
+        </form>
+        <br>
+        <a href="{{ url_for('factu') }}">Lista de Facturas</a>
+    </div>
+</body>
+</html>

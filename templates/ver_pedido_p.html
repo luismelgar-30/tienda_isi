@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="stylesheet" href="/static/archivo.css">
+    <meta charset="UTF-8">
+    <title>Ver Pedido</title>
+ 
+    <script>
+        function calcularTotales() {
+            let total = 0;
+            let subtotal = 0;
+
+            // Sumar totales
+            const totales = document.querySelectorAll('.total');
+            totales.forEach(function(item) {
+                total += parseFloat(item.textContent);
+            });
+
+            // Sumar subtotales
+            const subtotales = document.querySelectorAll('.subtotal');
+            subtotales.forEach(function(item) {
+                subtotal += parseFloat(item.textContent);
+            });
+
+            // Calcular impuestos (total - subtotal)
+            let impuestos = total - subtotal;
+
+            // Actualizar el DOM con los valores calculados
+            document.getElementById('sumaTotal').textContent = total.toLocaleString('es-HN', {
+                style: 'currency',
+                currency: 'HNL'
+            });
+
+            document.getElementById('sumaSubTotal').textContent = subtotal.toLocaleString('es-HN', {
+                style: 'currency',
+                currency: 'HNL'
+            });
+
+            document.getElementById('sumaImpuestos').textContent = impuestos.toLocaleString('es-HN', {
+                style: 'currency',
+                currency: 'HNL'
+            });
+        }
+
+        // Llama a la función cuando se cargue la página
+        window.onload = calcularTotales;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Detalles del Pedido #{{ pedido[0] }}</h1>
+        <h2>Proveedor: {{ pedido[1] }}</h2>
+        <h3>Factura: {{ pedido[2] }}</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Impuesto</th>
+                    <th>Precio Unitario</th>
+                    <!-- Ocultado con CSS -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in detalles %}
+                <tr>
+                    <td>{{ detalle[2] }}</td>
+                    <td>{{ detalle[3] }}</td>
+                    <td>{{ detalle[5] }}%</td>
+                    <td>{{ detalle[4] }}</td>
+                    <td  class="subtotal total-column" >{{ detalle[6] }}</td>
+                    <td class="total total-column">{{ detalle[7] }}</td> <!-- Ocultado con CSS -->
+                </tr>
+                {% endfor %}
+                <!-- Nueva fila para el subtotal -->
+                <tr>
+                    <td colspan="3" style="text-align: right; font-weight: bold;">SUB TOTAL:</td>
+                    <td id="sumaSubTotal" style="font-weight: bold;"></td>
+                </tr>
+                <!-- Nueva fila para los impuestos -->
+                <tr>
+                    <td colspan="3" style="text-align: right; font-weight: bold;">Impuestos:</td>
+                    <td id="sumaImpuestos" style="font-weight: bold;"></td>
+                </tr>
+                <!-- Nueva fila para el total -->
+                <tr>
+                    <td colspan="3" style="text-align: right; font-weight: bold;">TOTAL:</td>
+                    <td id="sumaTotal" style="font-weight: bold;"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

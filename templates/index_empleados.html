@@ -4,44 +4,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Tabla de empleados</title>
+    <title>Agregar Empleado</title>
+    <script>
+        function validateForm() {
+            const nombre = document.getElementById('nombre').value;
+            const apellido = document.getElementById('apellido').value;
+            const telefono = document.getElementById('telefono').value;
+            const email = document.getElementById('email').value;
+            const fechaNacimiento = new Date(document.getElementById('fecha_nacimiento').value);
+            const fechaContratacion = new Date(document.getElementById('fecha_contratacion').value);
+            const tipo = document.getElementById('tipo').value;
+            const documento = document.getElementById('documento').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            const nombreApellidoPattern = /^[a-zA-Z]{3,12}$/;
+            const tripleLetrasPattern = /(.)\1\1/;
+
+            if (!nombreApellidoPattern.test(nombre) || tripleLetrasPattern.test(nombre)) {
+                errorMessage.textContent = "El nombre debe tener entre 3 y 12 letras, sin números, signos ni tres letras repetidas.";
+                return false;
+            }
+            if (!nombreApellidoPattern.test(apellido) || tripleLetrasPattern.test(apellido)) {
+                errorMessage.textContent = "El apellido debe tener entre 3 y 12 letras, sin números, signos ni tres letras repetidas.";
+                return false;
+            }
+
+            const telefonoPattern = /^[7893][0-9]{7}$/;
+            if (!telefonoPattern.test(telefono)) {
+                errorMessage.textContent = "El teléfono debe comenzar con 7, 8, 9 o 3 y tener exactamente 8 dígitos.";
+                return false;
+            }
+
+            const emailPattern = /^[^@]{5,15}@[^@]{2,10}\.[a-zA-Z]{2,}$/;
+            if (email.length < 9 || email.length > 20 || !emailPattern.test(email)) {
+                errorMessage.textContent = "El email debe tener entre 9 y 20 caracteres y contener una '@'.";
+                return false;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const age = today.getFullYear() - fechaNacimiento.getFullYear();
+            const monthDifference = today.getMonth() - fechaNacimiento.getMonth();
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < fechaNacimiento.getDate())) {
+                age--;
+            }
+
+            if (age < 18) {
+                errorMessage.textContent = "La fecha de nacimiento debe ser al menos 18 años antes de la fecha actual.";
+                return false;
+            }
+
+            const documentoPattern = /^[0-9]{13}$/;
+            if (!documentoPattern.test(documento)) {
+                errorMessage.textContent = "El documento debe tener exactamente 13 números.";
+                return false;
+            }
+
+            if (tipo === 'DNI') {
+                const dniPattern = /^(01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20)$/;
+                if (!dniPattern.test(documento.substring(0, 2))) {
+                    errorMessage.textContent = "El DNI debe comenzar con un código de departamento válido de Honduras.";
+                    return false;
+                }
+            }
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = "Las contraseñas no coinciden.";
+                return false;
+            }
+
+            errorMessage.textContent = "";
+            return true;
+        }
+
+        function setCurrentDate() {
+            const today = new Date().toISOString().split('T')[0];
+            const fechaContratacion = document.getElementById('fecha_contratacion');
+            fechaContratacion.value = today;
+        }
+
+        window.onload = setCurrentDate;
+    </script>
 </head>
 <body>
     <div class="container">
-        <h2>Tabla de empleados</h2>
-        
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-          {% endif %}
-        {% endwith %}
-        <form action="{{ url_for('submit') }}" method="post">
+        <h2>Agregar Empleado</h2>
+        <form action="{{ url_for('submit') }}" method="post" onsubmit="return validateForm()">
+            <div id="error-message" style="color: red;"></div>
             <label for="nombre">Nombre:</label>
             <input type="text" id="nombre" name="nombre" required><br><br>
             <label for="apellido">Apellido:</label>
             <input type="text" id="apellido" name="apellido" required><br><br>
             <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
             <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required><br><br>
-            <label for="puesto">Puesto de Trabajo:</label>
-              <select id="puesto_trabajo" name="puesto_trabajo" required>
-                  <option value="Gerente Ventas">Gerente de Ventas</option>
-                  <option value="Asesor de Ventas">Asesor de Ventas</option>
-                  <option value="Tecnico de Servicio">Técnico de Servicio</option>
-                  <option value="Especialista en Marketing">Especialista en Marketing</option>
-                  <option value="Gerente de Inventario">Gerente de Inventario</option>
-              </select>
-              <br><br>
-
+            <label for="id_puesto">Puesto de Trabajo:</label>
+            <select id="id_puesto" name="id_puesto" required>
+                <Option value="">Seleccione el Puesto de Trabajo</Option>
+                {% for puesto in puestos_de_trabajo %}
+                <option value="{{ puesto[0] }}">{{ puesto[1] }}</option>
+                {% endfor %}
+            </select><br><br>
             <label for="fecha_contratacion">Fecha de Contratación:</label>
-            <input type="date" id="fecha_contratacion" name="fecha_contratacion" required><br><br>
-            <label for="sucursal">Sucursal:</label>
-            <select id="sucursal" name="sucursal" required>
+            <input type="date" id="fecha_contratacion" name="fecha_contratacion" required readonly><br><br>
+            <label for="id_sucursal">Sucursal:</label>
+            <select id="id_sucursal" name="id_sucursal" required>
+                <Option value="">Seleccione La Sucursal del Empleado</Option>
                 {% for sucursal in sucursales %}
-                <option value="{{ sucursal[1] }}">{{ sucursal[0] }}</option>
+                <option value="{{ sucursal[0] }}">{{ sucursal[1] }}</option>
                 {% endfor %}
             </select><br><br>
             <label for="email">Email:</label>
@@ -50,16 +122,25 @@
             <input type="text" id="telefono" name="telefono"><br><br>
             <label for="tipo">Tipo:</label>
             <select id="tipo" name="tipo" required>
-              <option value="DNI ">DNI</option>
-              <option value="Pasaporte">Pasaporte</option>
-              <option value="RTN">RTN</option>
+                <Option value="">Seleccione el Tipo de Documentacion</Option>
+                <option value="DNI">DNI</option>
+                <option value="RTN">RTN</option>
+                <option value="Pasaporte">Pasaporte</option>
             </select><br><br>
-            <label for="telefono">Documento:</label>
-            <input type="text" id="documento" name="documento"><br><br>
+            <label for="documento">Documento:</label>
+            <input type="text" maxlength="13" id="documento" name="documento" required><br><br>
+            
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required><br><br>
+            
+            <label for="confirm_password">Confirmar Contraseña:</label>
+            <input type="password" id="confirm_password" name="confirm_password" required><br><br>
+
             <input type="submit" value="Guardar">
         </form>
+        
         <br>
-        <a value="lista de empleados" href="{{ url_for('empleados') }}">Lista de empleados</a>
+        <a href="{{ url_for('empleados') }}">Lista de empleados</a>
     </div>
 </body>
 </html>

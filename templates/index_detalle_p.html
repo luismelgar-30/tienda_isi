@@ -16,48 +16,128 @@
         function calculateTotal() {
             var subtotal = parseFloat(document.getElementById('subtotal').value) || 0;
             var impuesto = parseFloat(document.getElementById('id_impuesto').selectedOptions[0].dataset.tasa) || 0;
+            impuesto = impuesto / 100; // Convertir el impuesto a decimal
             var total = (subtotal * impuesto) + (subtotal);
             document.getElementById('total').value = total.toFixed(2);
         }
 
         function updatePrecioUnitario() {
-            var id_producto = document.getElementById('id_producto').value;
-            if (id_producto) {
-                fetch('/get_precio/' + id_producto)
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('precio_unitario').value = data.precio_unitario.toFixed(2);
-                        calculateSubtotal();
-                    })
-                    .catch(error => console.error('Error:', error));
+    var id_producto = document.getElementById('id_producto').value;
+    if (id_producto) {
+        fetch('/get_precio/' + id_producto)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('precio_unitario').value = data.precio_unitario.toFixed(2);
+                var cantidad_en_stock = data.cantidad_en_stock;
+                var stock_maximo = data.stock_maximo;
+                var cantidad_disponible = stock_maximo - cantidad_en_stock;
+
+                if (cantidad_disponible <= 0) {
+                    document.getElementById('cantidad').value = '';
+                    document.getElementById('cantidad').disabled = true;
+                    document.getElementById('cantidad_disponible').textContent = "Este producto ya alcanzó el stock máximo.";
+                } else {
+                    document.getElementById('cantidad').max = cantidad_disponible;
+                    document.getElementById('cantidad').disabled = false;
+                    document.getElementById('cantidad_disponible').textContent = `Cantidad en stock: ${cantidad_en_stock}. Puede comprar hasta ${cantidad_disponible} unidades.`;
+                }
+                calculateSubtotal();
+            })
+            .catch(error => console.error('Error:', error));
+    }
+}
+
+
+        function validateCantidad() {
+            var cantidadField = document.getElementById('cantidad');
+            var cantidadValue = parseFloat(cantidadField.value);
+
+            if (cantidadValue > 1000) {
+                cantidadField.value = 1000;
             }
+
+            // Limitar a 4 dígitos
+            if (cantidadField.value.length > 4) {
+                cantidadField.value = cantidadField.value.slice(0, 4);
+            }
+
+            calculateSubtotal();
         }
+    </script>
+    <!-- Incluir CSS de Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Incluir jQuery (si aún no lo tienes) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Incluir JS de Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#id_producto').select2({
+                placeholder: "Seleccione un producto",
+                allowClear: true
+            });
+        });
+
+        function updateCantidadDisponible() {
+        var id_producto = document.getElementById('id_producto').value;
+        if (id_producto) {
+            fetch('/get_inventario/' + id_producto)
+                .then(response => response.json())
+                .then(data => {
+                    var cantidadDisponible = data.cantidad_en_stock;
+                    var stockMaximo = data.stock_maximo;
+                    var cantidadInput = document.getElementById('cantidad');
+                    var cantidadLabel = document.getElementById('cantidad-disponible');
+
+                    cantidadLabel.innerText = "Cantidad disponible en inventario: " + cantidadDisponible;
+
+                    if (cantidadDisponible >= stockMaximo) {
+                        cantidadInput.value = '';
+                        cantidadInput.disabled = true;
+                    } else {
+                        cantidadInput.max = stockMaximo - cantidadDisponible;
+                        cantidadInput.disabled = false;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+
+
+
+
     </script>
 </head>
 <body>
     <div class="container">
-    
         <h1>Nuevo Detalle de Compra</h1>
         <form action="{{ url_for('submit_detalle') }}" method="post">
             <label for="id_pedido">Pedido:</label>
             <select id="id_pedido" name="id_pedido" required>
                 <option value="">Selecciona un pedido</option>
                 {% for pedido in pedidos %}
-                    <option value="{{ pedido[0] }}">{{ pedido[0] }}</option>
+                    <option value="{{ pedido[0] }}" {% if pedido[0] == max_pedido %}selected{% endif %}>
+                        {{ pedido[0] }}
+                    </option>
                 {% endfor %}
-            </select><br>
+            </select>
+            <br>
 
-            <label for="id_producto">Producto:</label>
-            <select id="id_producto" name="id_producto" onchange="updatePrecioUnitario()" required>
-                <option value="">Selecciona un producto</option>
-                {% for producto in productos %}
-                    <option value="{{ producto[0] }}">{{ producto[1] }}</option>
-                {% endfor %}
-            </select><br>
-
-            <label for="cantidad">Cantidad:</label>
-            <input type="number" id="cantidad" name="cantidad" step="any" oninput="calculateSubtotal()" required><br>
-
+            <div class="producto-cantidad">
+                <label for="id_producto">Producto:</label>
+                <select id="id_producto" name="id_producto" onchange="updatePrecioUnitario()" required>
+                    <option value="">Selecciona un producto</option>
+                    {% for producto in productos %}
+                        <option value="{{ producto[0] }}">{{ producto[1] }}</option>
+                    {% endfor %}
+                </select>
+            
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" id="cantidad" name="cantidad" min="0" max="1000" step="any" oninput="validateCantidad()" required>
+                <br>
+                <span id="cantidad_disponible"></span>
+            </div>
+            
             <label for="precio_unitario">Precio Unitario:</label>
             <input type="number" id="precio_unitario" name="precio_unitario" step="any" readonly required><br>
 

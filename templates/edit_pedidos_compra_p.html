@@ -42,6 +42,95 @@
             background-color: #45a049;
         }
     </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            function validarFormulario() {
+                var fechaPedido = new Date(document.getElementById('fecha_pedido').value);
+                var fechaEntrega = document.getElementById('fecha_entrega').value ? new Date(document.getElementById('fecha_entrega').value) : null;
+                var fechaEntregaEstimada = new Date(document.getElementById('fecha_entrega_estimada').value);
+                
+                // Validar campos vacíos
+                var campos = [
+                    'id_proveedor', 
+                    'numero_factura', 
+                    'fecha_pedido', 
+                    'fecha_entrega_estimada', 
+                    'fecha_entrega', 
+                    'id_metodo', 
+                    'id_estado'
+                ];
+                
+                for (var i = 0; i < campos.length; i++) {
+                    var campo = document.getElementById(campos[i]);
+                    if (campo.value.trim() === '') {
+                        alert('Por favor, complete todos los campos obligatorios.');
+                        return false;
+                    }
+                }
+        
+                var numeroFactura = document.getElementById('numero_factura').value.trim();
+
+                // Validar que el número de factura tenga exactamente 12 dígitos
+                if (numeroFactura.replace(/\D/g, '').length !== 12) {
+                    alert('El número de factura debe contener exactamente 12 dígitos.');
+                    return false;
+                }
+
+                // Validar el campo número de factura
+                if (numeroFactura === 'None') {
+                    alert('El número de factura es obligatorio.');
+                    return false;
+                }              
+
+                // Validar fechas
+                if (fechaEntrega && fechaEntrega < fechaPedido) {
+                    alert("La fecha de entrega no puede ser antes que la fecha del pedido");
+                    return false;
+                }
+                if (fechaEntrega && fechaEntrega < new Date()) {
+                    alert("La fecha de entrega no puede estar en el pasado");
+                    return false;
+                }
+                if (fechaEntregaEstimada < fechaPedido) {
+                    alert("La fecha de entrega estimada no puede ser antes que la fecha del pedido");
+                    return false;
+                }
+                if (fechaEntregaEstimada < new Date()) {
+                    alert("La fecha de entrega estimada no puede estar en el pasado");
+                    return false;
+                }
+                if (fechaEntrega && fechaEntrega <= fechaEntregaEstimada) {
+                    alert("La fecha de entrega debe ser después de la fecha de entrega estimada");
+                    return false;
+                }
+                
+                return true;
+            }
+        
+            function formatearNumeroFactura(input) {
+                var valor = input.value.replace(/\D/g, '');
+                var partes = [];
+            
+                if (valor.length > 0) partes.push(valor.substring(0, 3));
+                if (valor.length > 3) partes.push(valor.substring(3, 5));
+                if (valor.length > 5) partes.push(valor.substring(5, 7));
+                if (valor.length > 7) partes.push(valor.substring(7, 12));
+            
+                input.value = partes.join('-');
+            }
+
+            // Asignar eventos
+            document.getElementById('numero_factura').addEventListener('input', function() {
+                formatearNumeroFactura(this);
+            });
+
+            document.querySelector('form').addEventListener('submit', function(event) {
+                if (!validarFormulario()) {
+                    event.preventDefault(); // Evita el envío del formulario si la validación falla
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -62,22 +151,37 @@
                 <option value="{{ proveedor[0] }}" {% if proveedor[0] == pedido[1] %}selected{% endif %}>{{ proveedor[1] }}</option>
                 {% endfor %}
             </select><br><br>
+        
+            <label for="id_empleado">Empleado:</label>
+            <input type="hidden" name="id_empleado" value="{{ session.id_empleado }}">
+            <input type="text" name="empleado_nombre" value="{{ session.nombre_empleado }} {{ session.apellido_empleado }}" readonly><br><br>
+        
+            <label for="numero_factura">Número de Factura:</label>
+            <input type="text" id="numero_factura" name="numero_factura" value="{{ pedido[2] }}" maxlength="16" required><br><br>
+
             <label for="fecha_pedido">Fecha Pedido:</label>
-            <input type="date" id="fecha_pedido" name="fecha_pedido" value="{{ pedido[2] }}" required><br><br>
+            <input type="date" id="fecha_pedido" name="fecha_pedido" value="{{ pedido[3] }}" required><br><br>
+            
+            <label for="fecha_entrega_estimada">Fecha Entrega Estimada:</label>
+            <input type="date" id="fecha_entrega_estimada" name="fecha_entrega_estimada" value="{{ pedido[4] }}" required><br><br>
+            
             <label for="fecha_entrega">Fecha Entrega:</label>
-            <input type="date" id="fecha_entrega" name="fecha_entrega" value="{{ pedido[3] }}" required><br><br>
+            <input type="date" id="fecha_entrega" name="fecha_entrega" value="{{ pedido[5] }}"><br><br>
+            
             <label for="id_metodo">Método de Pago:</label>
             <select id="id_metodo" name="id_metodo" required>
                 {% for metodo in metodos %}
-                <option value="{{ metodo[0] }}" {% if metodo[0] == pedido[4] %}selected{% endif %}>{{ metodo[1] }}</option>
+                <option value="{{ metodo[0] }}" {% if metodo[0] == pedido[6] %}selected{% endif %}>{{ metodo[1] }}</option>
                 {% endfor %}
             </select><br><br>
+            
             <label for="id_estado">Estado:</label>
             <select id="id_estado" name="id_estado" required>
                 {% for estado in estados %}
-                <option value="{{ estado[0] }}" {% if estado[0] == pedido[5] %}selected{% endif %}>{{ estado[1] }}</option>
+                <option value="{{ estado[0] }}" {% if estado[0] == pedido[7] %}selected{% endif %}>{{ estado[1] }}</option>
                 {% endfor %}
             </select><br><br>
+        
             <input type="submit" value="Actualizar">
         </form>
     </div>

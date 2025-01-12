@@ -8,14 +8,21 @@
     <title>Lista de Sucursales | Inventario</title>
 </head>
 <body>
+    
+    <div class="container">
     <h2>Lista de Sucursales</h2>
     <form method="get" action="{{ url_for('sucursales') }}">
+
+        <!-- Recuerda cambiar el numero del permiso dependiendo del id en la tabla n_pantalla -->
+        
+        {% if session.get('permiso_buscador_7') == 1 %} <!-- Usar Permiso ver para bloquear el Buscador -->
         <input type="text" name="search_query" placeholder="Buscar sucursales..." value="{{ search_query }}">
         <select name="search_criteria">
             <option value="ciudad" {% if search_criteria == 'ciudad' %}selected{% endif %}>Ciudad</option>
             <option value="telefono" {% if search_criteria == 'telefono' %}selected{% endif %}>Teléfono</option>
         </select>
         <button type="submit">Buscar</button>
+        {% endif %}
     </form>
 
     <br>
@@ -31,9 +38,16 @@
     </form>
 
     <br>
+    {% if session.get('permiso_crear_7') == 1 %} <!-- Usar Permiso Crear para bloquear el Insertar -->
     <a class="button-link ing" href="{{ url_for('index_sucursales') }}">Agregar Nueva Sucursal</a>
-    <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
-    
+    {% endif %}
+    <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+    {% if session.get('permiso_exportar_excel_7') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_excel') }}">Descargar Lista en Excel</a>
+    {% endif %}
+    {% if session.get('permiso_exportar_pdf_7') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+    {% endif %}
     <table>
         <thead>
             <tr>
@@ -50,8 +64,14 @@
                 <td>{{ sucursal[1] }}</td>
                 <td>{{ sucursal[2] }}</td>
                 <td>
+                    {% if session.get('permiso_editar_7') == 1 %} <!-- Usar Permiso Editar para bloquear el Editar -->
                     <a class="button-link baa" href="#" onclick="openEditWindow('{{ url_for('edit_sucursal', id_sucursal=sucursal[0]) }}')">Editar <i class='bx bx-edit' style='color:#000000'></i></a></button>
+                    {% else %}
+                    {% endif %}
+                    {% if session.get('permiso_eliminar_7') == 1 %} <!-- Usar Permiso Eliminar para bloquear el Eliminar -->
                     <a class="button-link bee" href="{{ url_for('eliminar_sucursal', id_sucursal=sucursal[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                    {% else %}
+                    {% endif %}
                 </td>
             </tr>
             {% else %}
@@ -78,6 +98,6 @@
             window.open(url, 'popupWindow', 'width=600,height=400,scrollbars=yes');
         }
     </script>
-        
+    </div>
 </body>
 </html>

@@ -5,6 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Editar impuesto</title>
+    <script>
+        function validarFormulario() {
+            const tipoImpuesto = document.getElementById('tipo_impuesto').value;
+            const tasaImpuesto = document.getElementById('tasa_impuesto').value;
+            const textoRegex = /^[A-Za-z\s]{3,50}$/;
+            const numerosRegex = /^[0-9]+$/;
+
+            if (!textoRegex.test(tipoImpuesto)) {
+                alert('El tipo de impuesto debe tener entre 3 y 50 caracteres, solo letras y espacios.');
+                return false;
+            }
+
+            if (!numerosRegex.test(tasaImpuesto)) {
+                alert('La tasa de impuesto solo debe contener valores numéricos.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function cerrarYRefrescar() {
+            if (window.opener) {
+                window.opener.location.reload(); // Refrescar la ventana original
+            }
+            window.close(); // Cerrar la ventana actual
+        }
+
+        function manejarEnvio(event) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado del formulario
+
+            const formulario = document.getElementById('editForm');
+            const esValido = validarFormulario();
+
+            if (esValido) {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', formulario.action, true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                
+                // Serializar los datos del formulario
+                const formData = new FormData(formulario);
+                const parametros = new URLSearchParams(formData).toString();
+
+                xhr.send(parametros);
+
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        cerrarYRefrescar(); // Cerrar la ventana emergente y actualizar la ventana principal
+                    } else {
+                        alert('Error al actualizar el impuesto.');
+                    }
+                };
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar el evento unload para cerrar la ventana emergente cuando se actualiza
+            window.onunload = function() {
+                if (window.opener) {
+                    window.opener.location.reload(); // Actualizar la ventana principal
+                }
+            };
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -18,18 +81,18 @@
             </ul>
           {% endif %}
         {% endwith %}
-        <form id="editForm" action="{{ url_for('edit_impuesto', id_impuesto=impuesto[0]) }}" method="post">
+        <form id="editForm" action="{{ url_for('edit_impuesto', id_impuesto=impuesto[0]) }}" method="post" onsubmit="manejarEnvio(event)">
           <label for="tipo_impuesto">Tipo Impuesto:</label>
-          <input type="text" id="tipo_impuesto" name="tipo_impuesto" value="{{ impuesto[1] }}" required><br><br>
+          <input type="text" id="tipo_impuesto" name="tipo_impuesto" required placeholder="Escribe el tipo de impuesto" value="{{ impuesto[1] }}"><br><br>
+
           <label for="tasa_impuesto">Tasa Impuesto:</label>
-          <input type="text" id="tasa_impuesto" name="tasa_impuesto" value="{{ impuesto[2] }}" required><br><br>
-            <input type="submit" value="Actualizar">
+          <input type="text" id="tasa_impuesto" name="tasa_impuesto" required placeholder="Escribe la tasa de impuesto." value="{{ impuesto[2] }}"><br><br>
+
+          <input type="submit" value="Actualizar">
         </form>
 
         <br>
-        <a href="{{ url_for('impuesto') }}">Lista de impuesto</a>
+        <a href="javascript:void(0);" onclick="cerrarYRefrescar()">Lista de impuestos</a>
     </div>
-
-    
 </body>
 </html>

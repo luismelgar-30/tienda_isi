@@ -5,6 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Agregar sucursal</title>
+    <script>
+      function validarFormulario() {
+          // Validación del campo Sucursal (correspondiente al campo Ciudad en la base de datos)
+          const sucursal = document.getElementById("sucursal").value;
+          const regexSucursal = /^(?!.*([a-zA-Z])\1{2})[a-zA-Z\s]{10,20}$/;
+          if (!regexSucursal.test(sucursal)) {
+              alert("El campo 'Sucursal' solo puede contener letras y espacios, no debe tener más de dos letras consecutivas iguales, y debe tener entre 10 y 20 caracteres.");
+              return false; // Evita el envío del formulario
+          }
+    
+          // Validación del campo Teléfono
+          const telefono = document.getElementById("telefono").value;
+          const regexTelefono = /^[23789]\d{7}$/;
+          if (!regexTelefono.test(telefono)) {
+              alert("El campo 'Teléfono' solo puede contener números, debe tener 8 dígitos y comenzar con 2, 3, 7, 8 o 9.");
+              return false; // Evita el envío del formulario
+          }
+    
+          // Validación de que los primeros tres números no se repitan en el resto del número
+          const primerosTres = telefono.substring(0, 3);
+          const restoTelefono = telefono.substring(3);
+    
+          // Recorre el resto del teléfono para comprobar si los números del inicio se repiten
+          for (let i = 0; i < restoTelefono.length; i++) {
+              if (primerosTres.includes(restoTelefono[i])) {
+                  alert("Los primeros tres números del teléfono no pueden repetirse en el resto del número.");
+                  return false; // Evita el envío del formulario
+              }
+          }
+    
+          return true; // Si todo está correcto, enviar el formulario
+      }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -18,9 +51,9 @@
             </ul>
           {% endif %}
         {% endwith %}
-        <form action="{{ url_for('submit') }}" method="post">
-            <label for="ciudad">Sucursal:</label>
-            <input type="text" id="ciudad" name="ciudad" required><br><br>
+        <form action="{{ url_for('submit') }}" method="post" onsubmit="return validarFormulario()">
+            <label for="sucursal">Sucursal:</label>
+            <input type="text" id="sucursal" name="ciudad" required><br><br>
             <label for="telefono">Teléfono:</label>
             <input type="text" id="telefono" name="telefono" required><br><br>
             <input type="submit" value="Guardar">

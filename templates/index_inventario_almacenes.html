@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Agregar Producto al Inventario</title>
+</head>
+<body>
+    <div class="container">
+    <h2>Agregar Producto al Inventario</h2>
+    <form method="post" action="{{ url_for('submit') }}">
+        
+        <label for="id_almacen">ID Almacén:</label>
+        <select id="id_almacen" name="id_almacen" required>
+            {% for almacen in almacenes %}
+            <option value="{{ almacen[0] }}">{{ almacen[1] }}</option> <!-- Asumiendo que el índice 0 es ID y el 1 es el nombre -->
+            {% endfor %}
+        </select>
+    
+        <label for="id_producto">ID Producto:</label>
+        <select id="id_producto" name="id_producto" required>
+            {% for producto in productos %}
+            <option value="{{ producto[0] }}">{{ producto[1] }}</option> <!-- Asumiendo que el índice 0 es ID y el 1 es el nombre -->
+            {% endfor %}
+        </select>
+
+        <label for="cantidad_en_stock">Cantidad en Stock:</label>
+        <input type="number" id="cantidad_en_stock" name="cantidad_en_stock" required>
+
+        <label for="stock_minimo">Stock Mínimo:</label>
+        <input type="number" id="stock_minimo" name="stock_minimo" required>
+
+        <label for="stock_maximo">Stock Máximo:</label>
+        <input type="number" id="stock_maximo" name="stock_maximo" required>
+    
+        <button type="submit">Agregar al Inventario</button>
+    </form>
+
+    <br>
+    <a class="ing" href="{{ url_for('inventario_almacen') }}">Lista de Inventarios</a>
+    <div>
+</body>
+</html>

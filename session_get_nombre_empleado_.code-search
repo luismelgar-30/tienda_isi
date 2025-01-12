@@ -1,0 +1,84 @@
+# Query: session.get('nombre_empleado',
+# ContextLines: 1
+
+16 results - 16 files
+
+app_almacenes.py:
+  542      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  543:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  544  
+
+app_capacitacion.py:
+  522      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  523:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  524  
+
+app_categorias.py:
+  437      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  438:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  439  
+
+app_devolucion_compra.py:
+  481      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  482:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  483  
+
+app_devolucion_ventas.py:
+  494      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  495:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  496  
+
+app_distribucion.py:
+  473      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  474:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  475  
+
+app_equipo.py:
+  420      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  421:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  422  
+
+app_mantenimiento.py:
+  504      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  505:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  506  
+
+app_pantallas.py:
+  504      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  505:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  506  
+
+app_pedido.py:
+  1587      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  1588:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  1589  
+
+app_pedidos_compra_p.py:
+  723      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  724:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  725  
+
+app_promocion.py:
+  419      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  420:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  421  
+
+app_puesto_de_trabajo.py:
+  491      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  492:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  493  
+
+app_sar.py:
+  397      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  398:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  399  
+
+app_sucursales.py:
+  488      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  489:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  490  
+
+app_transportistas.py:
+  479      fecha_hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  480:     nombre_empleado = f"{session.get('primer_nombre', 'Empleado desconocido')} {session.get('primer_apellido', '')}"
+  481  

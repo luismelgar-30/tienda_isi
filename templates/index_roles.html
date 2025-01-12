@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ingresar roles</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        // Función para manejar el envío del formulario
+        function handleFormSubmit(event) {
+            event.preventDefault(); // Evita el envío por defecto
+
+            // Valida el formulario manualmente
+            const form = document.getElementById('rolesForm');
+            if (form.checkValidity()) {
+                // Si es válido, envía el formulario con fetch
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Redirige solo si el servidor responde exitosamente
+                        window.location.href = "http://127.0.0.1:5038/roles";
+                    } else {
+                        alert("Error al guardar. Intente nuevamente.");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                // Si no es válido, muestra los mensajes de validación de HTML5
+                form.reportValidity();
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Ingresar roles</h2>
+        <form id="rolesForm" action="{{ url_for('submit_roles') }}" method="post" onsubmit="handleFormSubmit(event)">
+            <label for="nombre_rol">Nombre de la roles:</label>
+            <input type="text" id="nombre_rol" name="nombre_rol" required><br><br>
+            
+            <label for="Descripcion">Descripción:</label>
+            <input type="text" id="Descripcion" name="Descripcion" required><br><br>
+            
+            <input type="submit" value="Guardar">
+        </form> 
+        <br>
+        <a href="{{ url_for('roles') }}">Lista de roles</a>
+    </div>
+</body>
+</html>

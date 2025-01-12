@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Eliminar Devolución</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Eliminar Devolución</h2>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('eliminar_devolucion', id_devolucion=devolucion[0]) }}" method="post">
+          <label for="id_devolucion">ID Devolución:</label>
+          <input type="text" id="id_devolucion" name="id_devolucion" value="{{ devolucion[0] }}" readonly><br><br>
+
+          <label for="id_pedido">ID Pedido:</label>
+          <input type="text" id="id_pedido" name="id_pedido" value="{{ devolucion[1] }}" readonly><br><br>
+
+          <label for="id_detalle">ID Detalle:</label>
+          <input type="text" id="id_detalle" name="id_detalle" value="{{ devolucion[2] }}" readonly><br><br>
+
+          <label for="fecha_devolucion">Fecha de Devolución:</label>
+          <input type="text" id="fecha_devolucion" name="fecha_devolucion" value="{{ devolucion[3] }}" readonly><br><br>
+
+          <label for="motivo">Motivo:</label>
+          <textarea id="motivo" name="motivo" rows="4" readonly>{{ devolucion[4] }}</textarea><br><br>
+
+          <label for="cantidad_devuelta">Cantidad Devuelta:</label>
+          <input type="text" id="cantidad_devuelta" name="cantidad_devuelta" value="{{ devolucion[5] }}" readonly><br><br>
+
+          <button type="submit" onclick="return confirm('¿Estás seguro de eliminar la devolución con ID: {{ devolucion[0] }}?');">Eliminar</button>
+        </form>
+        
+        <br>
+        <a href="{{ url_for('devoluciones') }}">Lista de Devoluciones</a>
+    </div>
+</body>
+</html>

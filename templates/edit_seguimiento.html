@@ -13,14 +13,13 @@
             <input type="text" name="id_pedido" value="{{ seguimiento[1] }}" required readonly><br><br>
 
             <label>Fecha de Envío:</label>
-            <input type="date" name="fecha_envio" required value="{{ seguimiento[2].strftime('%Y-%m-%d') }}"><br><br>
+            <input type="date" name="fecha_envio" id="fecha_envio" required value="{{ seguimiento[2].strftime('%Y-%m-%d') }}"><br><br>
 
             <label>Fecha Estimada de Entrega:</label>
-            <input type="date" name="fecha_entrega_estimada" required value="{{ seguimiento[3].strftime('%Y-%m-%d') }}"><br><br>
+            <input type="date" name="fecha_entrega_estimada" id="fecha_entrega_estimada" required value="{{ seguimiento[3].strftime('%Y-%m-%d') }}"><br><br>
 
             <label>Fecha Real de Entrega:</label>
-            <input type="date" name="fecha_entrega_real" value="{{ seguimiento[4].strftime('%Y-%m-%d') if seguimiento[4] else '' }}"><br><br>
-
+            <input type="date" name="fecha_entrega_real" id="fecha_entrega_real" value="{{ seguimiento[4].strftime('%Y-%m-%d') if seguimiento[4] else '' }}"><br><br>
 
             <label for="estado">Estado:</label>
             <select id="estado" name="estado" required>
@@ -48,32 +47,90 @@
     </div>
 
     <script>
-        function closeWindow() {
-            window.close();
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializa la fecha actual
+            var today = new Date().toISOString().split('T')[0];
+            
+            // Establece la fecha de envío predeterminada y las restricciones
+            var fechaEnvioInput = document.getElementById('fecha_envio');
+            fechaEnvioInput.setAttribute('min', today);
+            
+            var maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 7); // Máximo es una semana después
+            fechaEnvioInput.setAttribute('max', maxDate.toISOString().split('T')[0]);
 
-        document.getElementById('editForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-    
-            var formData = new FormData(this);
-    
-            fetch(this.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    if (window.opener) {
-                        window.opener.location.reload();
-                    }
-                    closeWindow();
+            // Calcula y establece la fecha estimada de entrega en función de la fecha de envío
+            function updateFechaEstimada() {
+                var fechaEnvio = new Date(fechaEnvioInput.value);
+                var fechaEstimada = new Date(fechaEnvio);
+                fechaEstimada.setDate(fechaEstimada.getDate() + 7); // Fecha estimada es una semana después
+                document.getElementById('fecha_entrega_estimada').value = fechaEstimada.toISOString().split('T')[0];
+            }
+
+            fechaEnvioInput.addEventListener('change', updateFechaEstimada);
+            updateFechaEstimada(); // Inicializa la fecha estimada de entrega al cargar la página
+
+            // Actualiza la fecha real de entrega basada en el estado
+            function updateFechaReal() {
+                var estado = document.getElementById('estado').value;
+                var fechaRealInput = document.getElementById('fecha_entrega_real');
+                if (estado === 'Recibido' || estado === 'Completado') {
+                    fechaRealInput.value = today;
+                    fechaRealInput.setAttribute('readonly', true); // Hace que el campo sea de solo lectura
                 } else {
-                    throw new Error('Error al actualizar el seguimiento de envío');
+                    fechaRealInput.value = '';
+                    fechaRealInput.removeAttribute('readonly'); // Permite la edición si el estado no es 'Recibido' o 'Completado'
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+            }
+
+            document.getElementById('estado').addEventListener('change', updateFechaReal);
+            updateFechaReal(); // Inicializa la fecha real de entrega al cargar la página
+
+            // Valida el formulario antes de enviarlo
+            document.getElementById('editForm').addEventListener('submit', function(event) {
+                var fechaEnvio = new Date(fechaEnvioInput.value);
+                var fechaEstimada = new Date(document.getElementById('fecha_entrega_estimada').value);
+                var fechaReal = document.getElementById('fecha_entrega_real').value;
+                var fechaRealDate = fechaReal ? new Date(fechaReal) : null;
+                var errorMessage = "";
+
+                if (fechaRealDate && fechaRealDate < fechaEnvio) {
+                    errorMessage = "La Fecha Real de Entrega no puede ser anterior a la Fecha de Envío.";
+                } else if (fechaEstimada < fechaEnvio) {
+                    errorMessage = "La Fecha Estimada de Entrega no puede ser anterior a la Fecha de Envío.";
+                }
+
+                if (errorMessage) {
+                    alert(errorMessage);
+                    event.preventDefault(); // Evita el envío del formulario
+                } else {
+                    event.preventDefault(); // Evita el envío del formulario para usar fetch
+                    var formData = new FormData(this);
+
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            if (window.opener) {
+                                window.opener.location.reload();
+                            }
+                            closeWindow();
+                        } else {
+                            throw new Error('Error al actualizar el seguimiento de envío');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }
             });
+
+            // Cierra la ventana emergente
+            function closeWindow() {
+                window.close();
+            }
         });
     </script>
 </body>

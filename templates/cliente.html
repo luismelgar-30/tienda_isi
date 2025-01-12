@@ -11,8 +11,10 @@
     </style>
 </head>
 <body>
+    <div class="container2">
     <h2>Lista de Clientes</h2>
     <form method="get" action="{{ url_for('cliente') }}">
+        {% if session.get('permiso_buscador_5') == 1 %}
         <input type="text" name="search" placeholder="Buscar..." value="{{ search_query }}">
         <select name="search_field">
             <option value="id_cliente" {% if search_field == 'id_cliente' %}selected{% endif %}>ID</option>
@@ -23,16 +25,25 @@
             <option value="telefono" {% if search_field == 'telefono' %}selected{% endif %}>Telefono</option>
             <option value="direccion" {% if search_field == 'direccion' %}selected{% endif %}>Direccion</option>
             <option value="fecha_registro" {% if search_field == 'fecha_registro' %}selected{% endif %}>Fecha Registro</option>
-            <option value="documento" {% if search_field == 'documento' %}selected{% endif %}>Fecha Registro</option>
+            <option value="documento" {% if search_field == 'documento' %}selected{% endif %}>Documento</option>
         </select>
         <button type="submit">Buscar</button>
+        {% endif %}
     </form>
 
     <br>
+    {% if session.get('permiso_crear_5') == 1 %}
     <a class="button-link ing" href="{{ url_for('index_cliente') }}">Ingresar Nuevo cliente</a>
+    {% endif %}
     <a class="button-link ing" href="{{ url_for('historico_clientes') }}">Historico Clientes</a>
-    <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
-
+    <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+    {% if session.get('permiso_exportar_excel_5') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_excel') }}">Descargar Lista en Excel</a>
+    {% endif %}
+    {% if session.get('permiso_exportar_pdf_5') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+    {% endif %}
+    
     <table>
         <thead>
             <tr>
@@ -44,7 +55,7 @@
                 <th>Telefono</th>
                 <th>Direccion</th>
                 <th>Fecha Registro</th>
-                <th> Tipo</th>
+                <th>Tipo</th>
                 <th>Documento</th>
                 <th>Acciones</th>
             </tr>
@@ -61,16 +72,27 @@
                 <td>{{ cliente[6] }}</td>
                 <td>{{ cliente[7] }}</td>
                 <td>{{ cliente[8] }}</td>
-                <td>{{ cliente[9] }}</td>                
                 <td>
+                    {% if cliente[8] == 'DNI' %}
+                        {{ cliente[9] | format_dni }}
+                    {% elif cliente[8] == 'RTN' %}
+                        {{ cliente[9] }}
+                    {% elif cliente[8] == 'Pasaporte' %}
+                        {{ cliente[9] }}
+                    {% endif %}
+                </td>                
+                <td>
+                    {% if session.get('permiso_editar_5') == 1 %}
                     <a class="button-link baa" href="#" onclick="openEditWindow('{{ url_for('edit_cliente', id_cliente=cliente[0]) }}')">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                    {% endif %}
+                    {% if session.get('permiso_eliminar_5') == 1 %}
                     <a class="button-link bee" href="{{ url_for('eliminar_cliente', id_cliente=cliente[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
- 
 
     <script>
         function openEditWindow(url) {
@@ -82,5 +104,26 @@
             window.open(url, '_blank', 'toolbar=yes,scrollbars=yes,resizable=yes,top=' + top + ',left=' + left + ',width=' + width + ',height=' + height);
         }
     </script>
+    <form method="get" action="{{ url_for('cliente') }}">
+        <label for="per_page">Mostrar:</label>
+        <select name="per_page" id="per_page" onchange="this.form.submit()">
+            <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+            <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
+        </select>
+    </form>
+    <div>
+        <!-- Controles de paginación -->
+        {% if page > 1 %}
+            <a href="{{ url_for('cliente', page=page-1, per_page=per_page) }}">Anterior</a>
+        {% endif %}
+        
+        <span>Página {{ page }} de {{ total_pages }}</span>
+        
+        {% if page < total_pages %}
+            <a href="{{ url_for('cliente', page=page+1, per_page=per_page) }}">Siguiente</a>
+        {% endif %}
+    </div>
+    </div>
 </body>
 </html>

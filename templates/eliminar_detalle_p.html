@@ -2,15 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eliminar Detalle de Compra</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f7f7f7;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 300px;
+            border-radius: 8px;
+        }
+
+        h1 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        button, a {
+            padding: 8px 16px;
+            margin: 5px;
+            font-size: 14px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: white;
+        }
+
+        button {
+            background-color: #e74c3c;
+            border: none;
+            cursor: pointer;
+        }
+
+        a {
+            background-color: #3498db;
+        }
+
+        a:hover, button:hover {
+            opacity: 0.9;
+        }
+    </style>
 </head>
 <body>
-    <h1>Eliminar Detalle de Compra</h1>
-    <p>¿Estás seguro de que deseas eliminar este detalle?</p>
-    <form action="{{ url_for('eliminar_detalle_p', id_detalle=detalle_p[0]) }}" method="post">
-        <button type="submit">Eliminar</button>
-        <a href="{{ url_for('detalles_p') }}">Cancelar</a>
-    </form>
+    <div class="container">
+        <h1>Eliminar Detalle</h1>
+        <p>¿Estás seguro que deseas eliminar?</p>
+        <form action="{{ url_for('eliminar_detalle_p', id_detalle=detalle_p[0]) }}" method="post">
+            <button type="submit">Eliminar</button>
+            <a href="{{ url_for('detalles_p') }}">Cancelar</a>
+        </form>
+    </div>
 </body>
 </html>

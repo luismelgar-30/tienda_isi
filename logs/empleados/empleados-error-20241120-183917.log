@@ -1,0 +1,1 @@
+20241120-183917 - ERROR: Error al actualizar en la base de datos: 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`proyecto_is1`.`empleados`, CONSTRAINT `empleados_FK` FOREIGN KEY (`id_sucursal`) REFERENCES `sucursales` (`id_sucursal`) ON DELETE CASCADE ON UPDATE CASCADE)

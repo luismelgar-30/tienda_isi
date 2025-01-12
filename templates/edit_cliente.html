@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,29 +19,38 @@
           {% endif %}
         {% endwith %}
         <form id="editForm" action="{{ url_for('edit_cliente', id_cliente=cliente[0]) }}" method="post">
-            <label for="name">Nombre:</label>
+            <label for="nombre">Nombre:</label>
             <input type="text" id="nombre" name="nombre" value="{{ cliente[1] }}" required><br><br>
-            <label for="gender">Apellido:</label>
+            
+            <label for="apellido">Apellido:</label>
             <input type="text" id="apellido" name="apellido" value="{{ cliente[2] }}" required><br><br>
-            <label for="nationality">Fecha Nacimiento:</label>
+            
+            <label for="fecha_nacimiento">Fecha Nacimiento:</label>
             <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ cliente[3] }}" required><br><br>
             
-            <label for="nationality">Email:</label>
-            <input type="text" id="email" name="email" value="{{ cliente[4] }}" required><br><br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="{{ cliente[4] }}" required><br><br>
             
-            <label for="nationality">Telefono:</label>
+            <label for="telefono">Teléfono:</label>
             <input type="text" id="telefono" name="telefono" value="{{ cliente[5] }}" required><br><br>
             
-            <label for="nationality">Direccion:</label>
+            <label for="direccion">Dirección:</label>
             <input type="text" id="direccion" name="direccion" value="{{ cliente[6] }}" required><br><br>
             
-            <label for="nationality">Fecha Registro:</label>
-            <input type="date" id="fecha_registro" name="fecha_registro" value="{{ cliente[7] }}" required><br><br>
+            <label for="fecha_registro">Fecha Registro:</label>
+            <input type="date" id="fecha_registro" name="fecha_registro" value="{{ cliente[7] }}" required readonly><br><br>
 
-            <label for="nationality">Documento :</label>
+            <label for="tipo">Tipo:</label>
+            <select id="tipo" name="tipo" required>
+                <option value="DNI" {% if cliente[8] == 'DNI' %}selected{% endif %}>DNI</option>
+                <option value="Pasaporte" {% if cliente[8] == 'Pasaporte' %}selected{% endif %}>Pasaporte</option>
+                <option value="RTN" {% if cliente[8] == 'RTN' %}selected{% endif %}>RTN</option>
+            </select><br><br>
+
+            <label for="documento">Documento:</label>
             <input type="text" id="documento" name="documento" value="{{ cliente[9] }}" required><br><br>
 
-            <input type="submit" value="Update">
+            <input type="submit" value="Actualizar Cliente">
         </form>
         
         <br>
@@ -54,31 +63,98 @@
             window.close();
         }
 
-        // Maneja la respuesta después de enviar el formulario
-        document.getElementById('editForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Previene el envío estándar del formulario
+        // Configura la fecha actual por defecto para los campos de fecha
+        document.getElementById('fecha_registro').value = new Date().toISOString().split('T')[0]; // Fecha actual
 
-            // Realiza la solicitud AJAX para enviar el formulario
-            var formData = new FormData(this);
-            fetch(this.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    // Cierra la ventana actual
-                    closeWindow();
-                    // Redirige a cliente.html en la ventana principal
-                    window.opener.location.href = "{{ url_for('cliente') }}";
-                } else {
-                    throw new Error('Error al actualizar el cliente');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Puedes manejar errores aquí si es necesario
-            });
+        document.getElementById('editForm').addEventListener('submit', function(event) {
+            var errores = [];
+
+            // Validación de nombre y apellido
+            var nombre = document.getElementById('nombre').value;
+            var apellido = document.getElementById('apellido').value;
+            var regexTexto = /^[a-zA-Z]+$/;
+            var regexTresLetras = /(.)\1\1/;
+            
+            if (!regexTexto.test(nombre) || regexTresLetras.test(nombre)) {
+                errores.push("El nombre no debe contener números ni símbolos, ni tener tres letras iguales consecutivas.");
+            }
+
+            if (!regexTexto.test(apellido) || regexTresLetras.test(apellido)) {
+                errores.push("El apellido no debe contener números ni símbolos, ni tener tres letras iguales consecutivas.");
+            }
+
+            // Validación para evitar que nombre y apellido sean iguales
+            if (nombre.toLowerCase() === apellido.toLowerCase()) {
+                errores.push("El nombre y el apellido no pueden ser iguales.");
+            }
+
+            // Validación de fecha de nacimiento
+            var fechaNacimiento = new Date(document.getElementById('fecha_nacimiento').value);
+            var fechaLimite = new Date('1920-01-01');
+            var edadMinima = new Date(new Date().getFullYear() - 18, new Date().getMonth(), new Date().getDate());
+
+            if (fechaNacimiento < fechaLimite || fechaNacimiento > edadMinima) {
+                errores.push("La fecha de nacimiento no puede ser anterior a 1920 y debes tener al menos 18 años.");
+            }
+
+            // Validación de email
+            var email = document.getElementById('email').value;
+            var regexEmail = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+            if (!regexEmail.test(email)) {
+                errores.push("El correo electrónico no es válido.");
+            }
+
+            // Validación de documento según tipo
+            var tipo = document.getElementById('tipo').value;
+            var documento = document.getElementById('documento').value;
+            var regexDNI = /^[0-1][0-8]\d{11}$/;
+            var regexRTN = /^\d{13}$/;  // 13 dígitos sin guiones
+            var regexPasaporte = /^E\d{7}$/;
+
+            if (tipo === "DNI" && !regexDNI.test(documento)) {
+                errores.push("El DNI debe tener 13 números y comenzar con un número entre 01 y 18.");
+            } else if (tipo === "RTN" && !regexRTN.test(documento)) {
+                errores.push("El RTN debe tener 13 números.");
+            } else if (tipo === "Pasaporte" && !regexPasaporte.test(documento)) {
+                errores.push("El Pasaporte debe comenzar con 'E' seguido de 7 números.");
+            }
+
+            // Formatear el RTN para que sea más legible antes de enviarlo
+            if (tipo === "RTN" && regexRTN.test(documento)) {
+                documento = documento.replace(/^(\d{4})(\d{4})(\d{5})$/, "$1-$2-$3");
+                document.getElementById('documento').value = documento;  // Actualiza el valor del campo con el formato
+            }
+
+            // Si hay errores, mostrar alerta y prevenir el envío del formulario
+            if (errores.length > 0) {
+                alert(errores.join("\n"));
+                event.preventDefault();
+            } else {
+                // Realiza la solicitud AJAX para enviar el formulario
+                var formData = new FormData(this);
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Cierra la ventana actual y actualiza la ventana principal
+                        closeWindow();
+                        window.opener.location.reload(); // Recarga la página principal
+                    } else {
+                        throw new Error('Error al actualizar el cliente');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Puedes manejar errores aquí si es necesario
+                });
+
+                event.preventDefault(); // Prevenir el envío estándar del formulario
+            }
         });
+
     </script>
 </body>
 </html>

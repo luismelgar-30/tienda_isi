@@ -5,6 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Agregar Producto</title>
+    <script>
+        // Validar nombre del producto
+        function validateProductName(name) {
+            const namePattern = /^[a-zA-Z]+( [a-zA-Z]+)*$/; // Solo letras y espacios
+            const minLength = 3;
+            const maxLength = 20;
+
+            // Verificar longitud
+            if (name.length < minLength || name.length > maxLength) {
+                return 'El nombre del producto debe tener entre 3 y 20 caracteres.';
+            }
+
+            // Verificar caracteres especiales
+            if (!namePattern.test(name)) {
+                return 'El nombre del producto solo puede contener letras y espacios.';
+            }
+
+            // Verificar tres letras seguidas repetidas
+            const repeatedPattern = /(.)\1\1/;
+            if (repeatedPattern.test(name)) {
+                return 'El nombre del producto no puede contener tres letras seguidas repetidas.';
+            }
+
+            return null;
+        }
+
+        // Validar precio original
+        function validatePrice(price) {
+            const pricePattern = /^[0-9]+$/;
+
+            // Verificar si es un número positivo
+            if (!pricePattern.test(price) || parseFloat(price) <= 0) {
+                return 'El precio original debe ser un número positivo.';
+            }
+
+            return null;
+        }
+
+        function validateForm(event) {
+            const form = event.target;
+            const name = form['nombre'].value.trim();
+            const price = form['original_precio'].value.trim();
+            let errors = [];
+
+            // Validar nombre del producto
+            const nameError = validateProductName(name);
+            if (nameError) {
+                errors.push(nameError);
+            }
+
+            // Validar precio original
+            const priceError = validatePrice(price);
+            if (priceError) {
+                errors.push(priceError);
+            }
+
+            // Mostrar alertas si hay errores
+            if (errors.length > 0) {
+                event.preventDefault(); // Evitar el envío del formulario
+                alert(errors.join('\n')); // Mostrar todos los errores en una alerta
+            } else {
+                // Redirigir solo si no hay errores
+                event.preventDefault();
+                fetch(form.action, { 
+                    method: 'POST',
+                    body: new FormData(form)
+                }).then(response => {
+                    if (response.ok) {
+                        // Si la respuesta es exitosa, redirige
+                        window.location.href = "http://127.0.0.1:5017/producto";
+                    } else {
+                        alert('Error al guardar los datos.');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('Ocurrió un error al procesar el formulario.');
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('form').addEventListener('submit', validateForm);
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -18,48 +102,61 @@
           {% endif %}
         {% endwith %}
     <h2>Agregar Producto</h2>
-    <form method="post" action="{{ url_for('submit') }}">
+    <form method="post" action="{{ url_for('submit') }}" onsubmit="validateForm(event)">
+        <br>
         <label for="nombre">Nombre del Producto:</label>
         <input type="text" id="nombre" name="nombre" required>
         
+        <br>
         <label for="id_categoria">Nombre Categoria:</label>
         <select id="id_categoria" name="id_categoria" required>
+            <option value="" disabled selected>Seleccione una categoría</option>
             {% for categoria in categorias %}
             <option value="{{ categoria[0] }}">{{ categoria[1] }}</option>
             {% endfor %}
         </select>
         
+        <br>
         <label for="id_proveedor">Nombre Proveedor:</label>
         <select id="id_proveedor" name="id_proveedor" required>
+            <option value="" disabled selected>Seleccione un proveedor</option>
             {% for proveedor in proveedores %}
             <option value="{{ proveedor[0] }}">{{ proveedor[1] }}</option>
             {% endfor %}
         </select>
         
+        <br>
         <label for="original_precio">Precio Original:</label>
         <input type="text" id="original_precio" name="original_precio" required>
-    
+        
+        <br>
         <label for="id_impuesto">Tasa Impuesto:</label>
         <select id="id_impuesto" name="id_impuesto" required>
+            <option value="" disabled selected>Seleccione una tasa de impuesto</option>
             {% for impuesto in impuesto %}
-            <option value="{{ impuesto[0] }}">{{ impuesto[1] }}</option>
+            <option value="{{ impuesto[0] }}">{{ impuesto[1] }}%</option>
             {% endfor %}
         </select>
-    
+        
+        <br>
         <label for="id_promocion">Descuento:</label>
         <select id="id_promocion" name="id_promocion" required>
+            <option value="" disabled selected>Seleccione una promoción</option>
             {% for promocion in promocion %}
             <option value="{{ promocion[0] }}">{{ promocion[1] }}</option>
             {% endfor %}
         </select>
-    
+        
+        <br>
         <label for="id_garantia">Duración:</label>
         <select id="id_garantia" name="id_garantia" required>
+            <option value="" disabled selected>Seleccione una duración de garantía</option>
             {% for garantia in garantia %}
             <option value="{{ garantia[0] }}">{{ garantia[1] }}</option>
             {% endfor %}
         </select>
         
+        <br>
         <button type="submit">Agregar Producto</button>
     </form>
 

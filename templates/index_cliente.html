@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Ingrese su producto al cliente</h2>
+        <h2>Ingrese nuevo cliente</h2>
         {% with messages = get_flashed_messages() %}
           {% if messages %}
             <ul>
@@ -18,34 +18,120 @@
             </ul>
           {% endif %}
         {% endwith %}
-        <form action="{{ url_for('submit') }}" method="post">
+        <form action="{{ url_for('submit') }}" method="post" id="clientForm">
             
-            <label for="gender">nombre:</label>
+            <label for="nombre">Nombre:</label>
             <input type="text" id="nombre" name="nombre" required><br><br>
-            <label for="nationality">Apellido:</label>
+            
+            <label for="apellido">Apellido:</label>
             <input type="text" id="apellido" name="apellido" required><br><br>
-            <label for="nationality">Fecha Nacimiento:</label>
+            
+            <label for="fecha_nacimiento">Fecha Nacimiento:</label>
             <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required><br><br>
-            <label for="nationality">Email:</label>
+            
+            <label for="email">Email:</label>
             <input type="email" id="email" name="email" required><br><br>
-            <label for="nationality">Telefono:</label>
+            
+            <label for="telefono">Teléfono:</label>
             <input type="text" id="telefono" name="telefono" required><br><br>
-            <label for="nationality">Direccion:</label>
+            
+            <label for="direccion">Dirección:</label>
             <input type="text" id="direccion" name="direccion" required><br><br>
-            <label for="nationality">Fecha Registro:</label>
-            <input type="date" id="fecha_registro" name="fecha_registro" required><br><br>
+            
+            <label for="fecha_registro">Fecha Registro:</label>
+            <input type="date" id="fecha_registro" name="fecha_registro" required readonly><br><br>
+            
             <label for="tipo">Tipo:</label>
             <select id="tipo" name="tipo" required>
-              <option value="DNI ">DNI</option>
+              <option value="DNI">DNI</option>
               <option value="Pasaporte">Pasaporte</option>
               <option value="RTN">RTN</option>
             </select><br><br>
-            <label for="nationality">Documento:</label>
+            
+            <label for="documento">Documento:</label>
             <input type="text" id="documento" name="documento" required><br><br>
+            
             <input type="submit" value="Guardar">
         </form>
         <br>
-        <a value="lista de productos en el cliente" href="{{ url_for('cliente') }}">Lista de Clientes</a>
+        <a href="{{ url_for('cliente') }}">Lista de Clientes</a>
     </div>
+
+    <script>
+        // Configura la fecha actual por defecto para los campos de fecha
+        var fechaHoy = new Date().toISOString().split('T')[0]; // Obtiene la fecha en formato YYYY-MM-DD
+        document.getElementById('fecha_registro').value = fechaHoy;
+
+        document.getElementById('clientForm').addEventListener('submit', function(event) {
+            var errores = [];
+
+            // Validación de nombre y apellido
+            var nombre = document.getElementById('nombre').value;
+            var apellido = document.getElementById('apellido').value;
+            var regexTexto = /^[a-zA-Z]+$/;
+            var regexTresLetras = /(.)\1\1/;
+            
+            if (!regexTexto.test(nombre) || regexTresLetras.test(nombre)) {
+                errores.push("El nombre no debe contener números ni símbolos, ni tener tres letras iguales consecutivas.");
+            }
+
+            if (!regexTexto.test(apellido) || regexTresLetras.test(apellido)) {
+                errores.push("El apellido no debe contener números ni símbolos, ni tener tres letras iguales consecutivas.");
+            }
+
+            // Validación para evitar que nombre y apellido sean iguales
+            if (nombre.toLowerCase() === apellido.toLowerCase()) {
+                errores.push("El nombre y el apellido no pueden ser iguales.");
+            }
+
+            // Validación de fecha de nacimiento
+            var fechaNacimiento = new Date(document.getElementById('fecha_nacimiento').value);
+            var fechaLimite = new Date('1920-01-01');
+            var edadMinima = new Date(new Date().getFullYear() - 18, new Date().getMonth(), new Date().getDate());
+
+            if (fechaNacimiento < fechaLimite || fechaNacimiento > edadMinima) {
+                errores.push("La fecha de nacimiento no puede ser anterior a 1920 y debes tener al menos 18 años.");
+            }
+
+            // Validación de email
+            var email = document.getElementById('email').value;
+            var regexEmail = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+            if (!regexEmail.test(email)) {
+                errores.push("El correo electrónico no es válido.");
+            }
+
+            // Validación de documento según tipo
+            var tipo = document.getElementById('tipo').value;
+            var documento = document.getElementById('documento').value;
+            var regexDNI = /^[0-1][0-8]\d{11}$/;
+            var regexRTN = /^[0-1][0-8]\d{13}$/; // Ajustado a 13 dígitos
+            var regexPasaporte = /^E\d{7}$/;
+
+            if (tipo === "DNI" && !regexDNI.test(documento)) {
+                errores.push("El DNI debe tener 13 números y comenzar con un número entre 01 y 18.");
+            } else if (tipo === "RTN" && !regexRTN.test(documento)) {
+                errores.push("El RTN debe tener 14 números y comenzar con un número entre 01 y 18.");
+            } else if (tipo === "Pasaporte" && !regexPasaporte.test(documento)) {
+                errores.push("El Pasaporte debe comenzar con 'E' seguido de 7 números.");
+            }
+
+            // Validación de dirección
+            var direccion = document.getElementById('direccion').value;
+            var regexDireccion = /^[a-zA-Z.,\s]{8,}$/; // Al menos 8 letras, permite . , y espacios
+            var regexConsecutivos = /(.)\1\1/; // Tres caracteres consecutivos iguales
+            var regexInvalido = /[^a-zA-Z.,\s]/; // Cualquier carácter no permitido
+
+            if (!regexDireccion.test(direccion) || regexConsecutivos.test(direccion) || regexInvalido.test(direccion)) {
+                errores.push("La dirección debe tener al menos 8 letras, solo se permiten los caracteres '.' y ',', y no puede contener tres letras, números o símbolos consecutivos.");
+            }
+
+            // Si hay errores, mostrar alerta y prevenir el envío del formulario
+            if (errores.length > 0) {
+                alert(errores.join("\n"));
+                event.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>

@@ -13,9 +13,20 @@
 
         <!-- Formulario de búsqueda -->
         <form method="GET" action="{{ url_for('equipos') }}">
+            {% if session.get('permiso_buscador_8') == 1 %}
             <input type="text" name="search" placeholder="Buscar" value="{{ search_query }}">
             <button type="submit">Buscar</button>
+            {% endif %}
         </form>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
 
         <br>
         
@@ -31,10 +42,16 @@
         </form>
 
         <br>
-        
+        {% if session.get('permiso_crear_8') == 1 %}
         <a class="button-link ing" href="{{ url_for('index_equipo') }}">Ingresar Equipo</a>
-        <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
-
+        {% endif %}
+        <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+        {% if session.get('permiso_exportar_excel_8') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_excel') }}">Descargar Lista en Excel</a>
+        {% endif %}
+        {% if session.get('permiso_exportar_pdf_8') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+        {% endif %}
         <!-- Tabla de resultados -->
         <table>
             <thead>
@@ -56,8 +73,12 @@
                     <td>{{ equipo[3] }}</td>
                     <td>{{ equipo[4] }}</td>
                     <td>
+                        {% if session.get('permiso_editar_8') == 1 %}
                         <a class="button-link baa" href="{{ url_for('edit_equipo', id_equipo=equipo[0]) }}">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                        {% endif %}
+                        {% if session.get('permiso_eliminar_8') == 1 %}
                         <a class="button-link bee" href="{{ url_for('eliminar_equipo', id_equipo=equipo[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

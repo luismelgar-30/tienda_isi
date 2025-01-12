@@ -4,6 +4,82 @@
     <meta charset="UTF-8">
     <title>Gestión de Mantenimiento de Equipos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function setDefaultDate() {
+            const today = new Date();
+            const lastMonth = new Date(today);
+            lastMonth.setMonth(today.getMonth() - 1);
+
+            const todayString = today.toISOString().split('T')[0];
+            const lastMonthString = lastMonth.toISOString().split('T')[0];
+
+            const dateInput = document.getElementById('fecha');
+            dateInput.setAttribute('min', lastMonthString);
+            dateInput.setAttribute('value', todayString);
+        }
+
+        function validarFormulario() {
+            const idEquipo = document.getElementById('id_equipo').value;
+            const fecha = document.getElementById('fecha').value;
+            const tipo = document.getElementById('tipo').value;
+            const detalles = document.getElementById('detalles').value.trim();
+            const estado = document.getElementById('estado').value;
+            const documento = document.getElementById('documento').value;
+
+            // Validar ID del Equipo
+            if (!idEquipo) {
+                alert('Seleccione un ID de Equipo.');
+                return false;
+            }
+
+            // Validar Fecha
+            const minDate = document.getElementById('fecha').getAttribute('min');
+            if (!fecha || fecha < minDate) {
+                alert('La fecha debe ser posterior a un mes desde hoy.');
+                return false;
+            }
+
+            // Validar Tipo
+            if (!tipo) {
+                alert('Seleccione un tipo de mantenimiento.');
+                return false;
+            }
+
+            // Validar Detalles
+            const detallesPattern = /^[a-zA-Z, ]{8,50}$/;
+            if (!detalles) {
+                alert('Ingrese los detalles del mantenimiento.');
+                return false;
+            } else if (!detallesPattern.test(detalles)) {
+                alert('Los detalles deben tener entre 8 y 50 caracteres y solo pueden contener letras y comas.');
+                return false;
+            }
+
+            // Validar Estado
+            if (!estado) {
+                alert('Seleccione el estado del mantenimiento.');
+                return false;
+            }
+
+            // Validar Documento
+            const documentoPattern = /^(0[1-9]|1[0-8])\d{11}$/;
+            if (!documento || !documentoPattern.test(documento)) {
+                alert('El documento debe contener exactamente 13 dígitos, iniciar con un número entre 01 y 18, y ser un número positivo.');
+                return false;
+            }
+
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setDefaultDate();
+            document.querySelector('form').addEventListener('submit', function(event) {
+                if (!validarFormulario()) {
+                    event.preventDefault(); // Evitar el envío del formulario si hay errores
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -42,7 +118,7 @@
             </select>
             
             <label for="documento">Documento:</label>
-            <input type="text" id="documento" name="documento" required pattern="^[01]\d{12}$" title="El documento debe contener exactamente 13 dígitos, iniciar con 0 o 1 y ser un número positivo.">
+            <input type="text" id="documento" name="documento" required pattern="^(0[1-9]|1[0-8])\d{11}$" title="El documento debe contener exactamente 13 dígitos, iniciar con un número entre 01 y 18, y ser un número positivo.">
             
             <button type="submit">Agregar Mantenimiento</button>
         </form>

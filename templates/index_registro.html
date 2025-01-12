@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Ingresar usuarios</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Ingresar usuarios</h2>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        <form action="{{ url_for('submit') }}" method="post" onsubmit="return validateForm()">
+            <label for="name">Primer Nombre:</label>
+            <input type="text" id="primer_nombre" name="primer_nombre" required pattern="[A-Za-z]{3,15}" title="Solo letras, mínimo 3 y máximo 15 caracteres"><br><br>
+            <label for="gender">Primer Apellido:</label>
+            <input type="text" id="primer_apellido" name="primer_apellido" required pattern="[A-Za-z]{3,15}" title="Solo letras, mínimo 3 y máximo 15 caracteres"><br><br>
+            <label for="nationality">Correo:</label>
+            <input type="email" id="correo" name="correo" required pattern="[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+" title="Formato de correo inválido"><br><br>
+            <label for="nationality">Contraseña:</label>
+            <input type="password" id="password" name="password" required minlength="6" maxlength="20" title="Mínimo 6 y máximo 20 caracteres"><br><br>
+            <label for="id_sucursal">Sucursal:</label>
+            <select id="id_sucursal" name="id_sucursal" required>
+                <option value="" disabled selected>Seleccione una sucursal</option>
+                {% for sucursales in sucursales %}
+                <option value="{{ sucursales[0] }}">{{ sucursales[1] }}</option>
+                {% endfor %}
+            </select><br><br>
+            <input type="submit" value="Guardar">
+        </form>
+        <br>
+        <a href="{{ url_for('index_login') }}">Login</a>
+
+    </div>
+    <script>
+        function validateForm() {
+            var primer_nombre = document.getElementById('primer_nombre').value;
+            var primer_apellido = document.getElementById('primer_apellido').value;
+            var correo = document.getElementById('correo').value;
+            var password = document.getElementById('password').value;
+            var regexTresLetrasRepetidas = /(.)\1{2,}/;
+
+            if (regexTresLetrasRepetidas.test(primer_nombre) || regexTresLetrasRepetidas.test(primer_apellido)) {
+                alert('No se permiten tres letras repetidas consecutivamente.');
+                return false;
+            }
+
+            if (/[^A-Za-z]/.test(primer_nombre) || /[^A-Za-z]/.test(primer_apellido)) {
+                alert('No se permiten signos ni números en los campos de nombre y apellido.');
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</body>
+</html>

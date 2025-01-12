@@ -4,38 +4,91 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Editar Pedido</title>
+    <script>
+        function validarFacturaInput() {
+            var input = document.getElementById('numero_factura');
+            var rawValue = input.value.replace(/[^0-9]/g, ''); // Quita caracteres no numéricos
+
+        }
+
+        function validarFormulario() {
+            
+
+            var fechaPedido = new Date(document.getElementById('fecha_pedido').value);
+            var fechaEntrega = new Date(document.getElementById('fecha_entrega').value);
+
+            if (fechaEntrega < fechaPedido) {
+                alert("La fecha de entrega no puede ser antes que la fecha del pedido");
+                return false;
+            }
+            if (fechaEntrega < new Date()) {
+                alert("La fecha de entrega no puede estar en el pasado");
+                return false;
+            }
+
+
+            return true;
+        }
+
+        function formatearNumeroFactura(input) {
+            var valor = input.value.replace(/\D/g, '');
+            var partes = [];
+
+            if (valor.length > 0) partes.push(valor.substring(0, 3));
+            if (valor.length > 3) partes.push(valor.substring(3, 5));
+            if (valor.length > 5) partes.push(valor.substring(5, 7));
+            if (valor.length > 7) partes.push(valor.substring(7, 13));
+
+            input.value = partes.join('-');
+        }
+    </script>
 </head>
 <body>
     <h1>Editar Pedido</h1>
-    <form action="{{ url_for('edit_pedido', id_pedido=pedido[0]) }}" method="post">
+    <form action="{{ url_for('edit_pedido', id_pedido=pedido['id_pedido']) }}" method="post" onsubmit="return validarFormulario()">
+
         <label for="id_cliente">Cliente:</label>
         <select id="id_cliente" name="id_cliente" required>
             {% for cliente in clientes %}
-                <option value="{{ cliente[0] }}" {% if cliente[0] == pedido[1] %}selected{% endif %}>{{ cliente[1] }}</option>
+                <option value="{{ cliente[0] }}" {% if cliente[0] == pedido['id_cliente'] %}selected{% endif %}>{{ cliente[1] }}</option>
             {% endfor %}
         </select><br>
 
+        <label for="empleados">Empleado:</label>
+        <input type="text" name="empleados" value="{{ session.primer_nombre }} {{ session.primer_apellido }}" readonly>
+
+       
+            
         <label for="fecha_pedido">Fecha Pedido:</label>
-        <input type="date" id="fecha_pedido" name="fecha_pedido" value="{{ pedido[2] }}" required><br>
+        <input type="date" id="fecha_pedido" name="fecha_pedido" value="{{ pedido['fecha_pedido'] }}" required><br>
+
+        <label for="fecha_entrega_estimada">Fecha Entrega Estimada:</label>
+        <input type="date" id="fecha_entrega_estimada" name="fecha_entrega_estimada" value="{{ pedido['fecha_entrega_estimada'] }}" required><br>
+
 
         <label for="fecha_entrega">Fecha Entrega:</label>
-        <input type="date" id="fecha_entrega" name="fecha_entrega" value="{{ pedido[3] }}" required><br>
+        <input type="date" id="fecha_entrega" name="fecha_entrega" value="{{ pedido['fecha_entrega'] }}" required><br>
 
+        
         <label for="id_metodo">Método de Pago:</label>
         <select id="id_metodo" name="id_metodo" required>
             {% for metodo in metodos %}
-                <option value="{{ metodo[0] }}" {% if metodo[0] == pedido[4] %}selected{% endif %}>{{ metodo[1] }}</option>
+                <option value="{{ metodo[0] }}" {% if metodo[0] == pedido['id_metodo'] %}selected{% endif %}>{{ metodo[1] }}</option>
             {% endfor %}
         </select><br>
 
         <label for="id_estado">Estado:</label>
         <select id="id_estado" name="id_estado" required>
             {% for estado in estados %}
-                <option value="{{ estado[0] }}" {% if estado[0] == pedido[5] %}selected{% endif %}>{{ estado[1] }}</option>
+                <option value="{{ estado[0] }}" {% if estado[0] == pedido['id_estado'] %}selected{% endif %}>{{ estado[1] }}</option>
             {% endfor %}
         </select><br>
 
+        
+
         <input type="submit" value="Actualizar">
+        <label for="numero_factura" style="visibility: hidden;">Numero de Factura:</label>
+        <input type="text" id="numero_factura" name="numero_factura" value="{{ pedido.get('numero_factura', '') }}" oninput="formatearNumeroFactura(this)" maxlength="16"  style="visibility: hidden;"><br><br>
     </form>
     <a href="{{ url_for('pedidos') }}">Volver</a>
 </body>

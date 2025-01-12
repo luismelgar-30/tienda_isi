@@ -19,10 +19,12 @@
             <a style="padding: 10px 15px; font-size: 16px; width: auto; max-width: 150px;" class="button-link ing" href="{{ url_for('index_detalle') }}">Ingresar Detalle</a>
         </div>
         <br>
+        
         <a href="http://127.0.0.1:5012/pedidos">
             <button type="button">Ir a Pedido</button>
         </a>
-        <br>8
+     
+        <br>
         <br>
         <a class="button-link ing2"  href="http://127.0.0.1:5501/index.html">INICIO</a>
         <br>
@@ -41,12 +43,15 @@
                 <tr>
                     <th>ID Detalle</th>
                     <th>ID Pedido</th>
+                    <th>Empleado</th>
                     <th>Producto</th>
                     <th>Cantidad</th>
                     <th>Precio Unitario</th>
                     <th>Subtotal</th>
                     <th>Impuesto</th>
                     <th>Total</th>
+                    
+                    
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -55,15 +60,22 @@
                     <tr>
                         <td>{{ detalle[0] }}</td>
                         <td>{{ detalle[1] }}</td>
+                        <td>{{ detalle[8] }}</td>
                         <td>{{ detalle[2] }}</td>
                         <td>{{ detalle[3] }}</td>
                         <td>{{ detalle[4] }}</td>
                         <td>{{ detalle[5] }}</td>
                         <td>{{ detalle[6] }}</td>
                         <td>{{ detalle[7] }}</td>
+                        
                         <td>
-                            <a class="button-link baa" href="#" onclick="openEditWindow('{{ url_for('edit_detalle', id_detalle=detalle[0]) }}')">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                         
+                            <a class="button-link baa" href="#" onclick="openEditWindow('{{ url_for('edit_detalle', id_detalle=detalle[0]) }}')">Facturar o Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                            
+                            <br>
+                            
                             <a class="button-link bee" href="{{ url_for('eliminar_detalle', id_detalle=detalle[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                           
                         </td>
                     </tr>
                 {% endfor %}

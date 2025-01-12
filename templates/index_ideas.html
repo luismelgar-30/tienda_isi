@@ -3,97 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ideas de Mejora</title>
+    <title>Formulario de Idea de Mejora</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script>
         function validarFormulario() {
             var documento = document.getElementById('documento').value;
-            var estado = document.getElementById('estado').value;
             var descripcionIdea = document.getElementById('descripcion_idea').value;
+            var estado = document.getElementById('estado').value;
             var descripcionImplementacion = document.getElementById('descripcion_implementacion').value;
+            var impacto = document.getElementById('impacto').value;
+            var indicadoresRendimiento = document.getElementById('indicadores_rendimiento').value;
 
-            // Validación de Documento
-            var documentoRegex = /^[01][0-9]{12}$/;
+            // Validación de documento: 13 dígitos, empieza con 01 a 18
+            var documentoRegex = /^(0[1-9]|1[0-8])\d{11}$/;
             if (!documentoRegex.test(documento)) {
-                alert('El documento debe ser un número positivo de 13 dígitos y comenzar con 0 o 1.');
+                alert('El documento debe tener 13 dígitos y comenzar con números del 01 al 18.');
                 return false;
             }
 
-            // Validación de Estado
-            var estadosValidos = ['revisada', 'no revisada'];
-            if (!estadosValidos.includes(estado)) {
-                alert('El estado debe ser "revisada" o "no revisada".');
+            // Validaciones para descripción de la idea e implementación: solo letras, longitud 3-50, no más de tres letras seguidas
+            var descripcionRegex = /^[A-Za-z\s,]{3,50}$/;
+            var tresLetrasSeguidasRegex = /(.)\1\1/;
+
+            if (!descripcionRegex.test(descripcionIdea) || tresLetrasSeguidasRegex.test(descripcionIdea)) {
+                alert('La descripción de la idea debe contener solo letras y comas, tener entre 3 y 50 caracteres, y no tener tres letras iguales consecutivas.');
                 return false;
             }
 
-            // Validación de Descripción
-            var descripcionRegex = /^[a-z]{8,20}$/;
-            var repetidoRegex = /(.)\1{2,}/;
-            if (!descripcionRegex.test(descripcionIdea) || repetidoRegex.test(descripcionIdea)) {
-                alert('La descripción de la idea debe tener entre 8 y 20 caracteres, solo minúsculas, sin números y sin letras o signos repetidos tres veces seguidas.');
+            if (!descripcionRegex.test(descripcionImplementacion) || tresLetrasSeguidasRegex.test(descripcionImplementacion)) {
+                alert('La descripción de la implementación debe contener solo letras y comas, tener entre 3 y 50 caracteres, y no tener tres letras iguales consecutivas.');
                 return false;
             }
 
-            if (!descripcionRegex.test(descripcionImplementacion) || repetidoRegex.test(descripcionImplementacion)) {
-                alert('La descripción de la implementación debe tener entre 8 y 20 caracteres, solo minúsculas, sin números y sin letras o signos repetidos tres veces seguidas.');
+            // Validación de fechas
+            var fechaPropuesta = new Date(document.getElementById('fecha_propuesta').value);
+            var fechaImplementacion = new Date(document.getElementById('fecha_implementacion').value);
+            var fechaEvaluacion = new Date(document.getElementById('fecha_evaluacion').value);
+            var fechaActual = new Date();
+            var unMesAtras = new Date();
+            unMesAtras.setMonth(unMesAtras.getMonth() - 1);
+
+            if (fechaPropuesta > fechaActual || fechaPropuesta < unMesAtras) {
+                alert('La fecha propuesta no puede ser futura y debe ser como máximo un mes atrás.');
+                return false;
+            }
+
+            if (fechaImplementacion < fechaActual.setHours(0, 0, 0, 0)) {
+                alert('La fecha de implementación debe ser la fecha actual o una fecha futura.');
+                return false;
+            }
+
+            if (fechaEvaluacion < fechaImplementacion) {
+                alert('La fecha de evaluación debe ser la misma fecha de implementación o una fecha futura.');
                 return false;
             }
 
             return true;
         }
+
+        // Asignar fecha actual por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            var hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha_propuesta').setAttribute('max', hoy);
+            document.getElementById('fecha_propuesta').value = hoy;
+            document.getElementById('fecha_implementacion').setAttribute('min', hoy);
+            document.getElementById('fecha_implementacion').value = hoy;
+            document.getElementById('fecha_evaluacion').setAttribute('min', hoy);
+            document.getElementById('fecha_evaluacion').value = hoy;
+        });
     </script>
 </head>
 <body>
-    <h1>Formulario de Ideas de Mejora</h1>
+    <h1>Formulario de Idea de Mejora</h1>
     <form action="{{ url_for('submit') }}" method="POST" onsubmit="return validarFormulario()">
         <label for="documento">Documento:</label>
-        <input type="text" id="documento" name="documento" pattern="^[01][0-9]{12}$" title="El documento debe ser un número positivo de 13 dígitos y comenzar con 0 o 1." required>
-        
+        <input type="text" id="documento" name="documento" required>
+
         <label for="fecha_propuesta">Fecha Propuesta:</label>
         <input type="date" id="fecha_propuesta" name="fecha_propuesta" required>
-        
+
         <label for="descripcion_idea">Descripción de la Idea:</label>
         <textarea id="descripcion_idea" name="descripcion_idea" required></textarea>
-        
+
         <label for="estado">Estado:</label>
-        <select id="estado" name="estado" required>
-            <option value="revisada">Revisada</option>
-            <option value="no revisada">No Revisada</option>
-        </select>
-        
+        <input type="text" id="estado" name="estado" required>
+
         <label for="fecha_implementacion">Fecha Implementación:</label>
         <input type="date" id="fecha_implementacion" name="fecha_implementacion" required>
-        
+
         <label for="descripcion_implementacion">Descripción de la Implementación:</label>
         <textarea id="descripcion_implementacion" name="descripcion_implementacion" required></textarea>
-        
+
         <label for="fecha_evaluacion">Fecha Evaluación:</label>
         <input type="date" id="fecha_evaluacion" name="fecha_evaluacion" required>
-        
+
         <label for="impacto">Impacto:</label>
         <select id="impacto" name="impacto" required>
             <option value="a futuro">A Futuro</option>
             <option value="inmediato">Inmediato</option>
         </select>
-        
+
         <label for="indicadores_rendimiento">Indicadores de Rendimiento:</label>
         <select id="indicadores_rendimiento" name="indicadores_rendimiento" required>
-            <option value="bajo">Bajo</option>
-            <option value="medio">Medio</option>
             <option value="alto">Alto</option>
+            <option value="medio">Medio</option>
+            <option value="bajo">Bajo</option>
         </select>
-        
-        <button type="submit">Enviar</button>
+
+        <button type="submit">Guardar Cambios</button>
     </form>
-    <a href="{{ url_for('ideas') }}">Ver Ideas</a>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul>
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
+    <a href="{{ url_for('ideas') }}">Volver</a>
 </body>
 </html>

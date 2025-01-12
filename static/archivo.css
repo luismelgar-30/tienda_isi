@@ -1,0 +1,112 @@
+/* Estilo general */
+body {
+    font-family: Arial, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h1, h2, h3 {
+    margin: 0 0 10px;
+    color: #555;
+}
+
+h1 {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+}
+
+h2, h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+/* Estilo de la tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+thead {
+    background-color: #333;
+    color: #fff;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.total-column {
+    text-align: right;
+}
+
+/* Estilo para las filas de totales */
+tfoot tr td {
+    font-weight: bold;
+    text-align: right;
+    padding-top: 10px;
+}
+
+tfoot tr td:last-child {
+    text-align: right;
+}
+
+tfoot {
+    border-top: 2px solid #333;
+}
+
+/* Estilo para ocultar columnas innecesarias */
+td.ocultar {
+    display: none;
+}
+
+/* Estilo para totales */
+#sumaTotal, #sumaSubTotal {
+    font-size: 16px;
+    font-weight: bold;
+    color: #000;
+}
+
+/* Responsivo */
+@media screen and (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+
+    th, td {
+        padding: 5px;
+    }
+}
+
+.total-column {
+    display: none; /* Oculta la columna "Total" */
+}
+    .subtotal-column {
+    display: none;
+}

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ingresar permisos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .column {
+            width: 48%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="submit"] {
+            margin-top: 15px;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .button-group {
+            margin: 15px 0;
+        }
+
+        .button-group button {
+            margin-right: 10px;
+        }
+    </style>
+    <script>
+        function seleccionarTodas() {
+            const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]');
+            checkboxes.forEach(checkbox => checkbox.checked = true);
+        }
+
+        function limpiar() {
+            const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+        }
+    </script>
+    <script>
+        function actualizarPantallas() {
+    const idRol = document.getElementById("id_rol").value;
+    
+    console.log(`Enviando solicitud AJAX para obtener pantallas con id_rol: ${idRol}`);
+
+    // Realiza una petición AJAX para obtener las pantallas permitidas para el rol seleccionado
+    fetch(`/obtener_pantallas/${idRol}`)
+        .then(response => response.json())
+        .then(data => {
+            const pantallaSelect = document.getElementById("id_permiso_pantalla");
+            
+            // Vaciar el select de pantallas
+            pantallaSelect.innerHTML = '<option value="">Seleccione una opción</option>';
+
+            // Añadir las opciones de pantallas permitidas
+            data.forEach(pantalla => {
+                const option = document.createElement("option");
+                option.value = pantalla.id_permiso_pantalla;
+                option.textContent = pantalla.nombre_pantalla;
+                pantallaSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error al obtener las pantallas:', error);
+        });
+}
+
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Ingresar permisos</h2>
+        <form id="permisosForm" action="{{ url_for('submit_permisos') }}" method="post">
+            <div class="form-group">
+                <label for="id_rol">Rol:</label>
+                <select id="id_rol" name="id_rol" onchange="actualizarPantallas()">
+                    <option value="">Seleccione una opción</option>
+                    {% for rol in roles %}
+                        <option value="{{ rol[0] }}">{{ rol[1] }}</option>
+                    {% endfor %}
+                </select>
+                
+                <label for="id_permiso_pantalla">Pantalla:</label>
+                <select id="id_permiso_pantalla" name="id_permiso_pantalla" required>
+                    <option value="">Seleccione una opción</option>
+                    {% for pantalla in pantallas_permitidas %}
+                        <option value="{{ pantalla.id_permiso_pantalla }}">{{ pantalla.nombre_pantalla }}</option>
+                    {% endfor %}
+                </select>            
+            </select>
+            </div>
+            <br>
+
+            <!-- Checkboxes grouped in two columns -->
+            <div class="checkbox-group">
+                <div class="column">
+                    <label><input type="checkbox" id="permiso_crear" name="permiso_crear"> Crear</label>
+                    <label><input type="checkbox" id="permiso_editar" name="permiso_editar"> Editar</label>
+                    <label><input type="checkbox" id="permiso_eliminar" name="permiso_eliminar"> Eliminar</label>
+                    <label><input type="checkbox" id="permiso_ver" name="permiso_ver"> Ver</label>
+                </div>
+                <div class="column">
+                    <label><input type="checkbox" id="permiso_buscador" name="permiso_buscador"> Buscador</label>
+                    <label><input type="checkbox" id="permiso_exportar_pdf" name="permiso_exportar_pdf"> Exportar PDF</label>
+                    <label><input type="checkbox" id="permiso_exportar_excel" name="permiso_exportar_excel"> Exportar Excel</label>
+                </div>
+            </div>
+
+            <!-- Button group -->
+            <div class="button-group">
+                <button type="button" onclick="seleccionarTodas()">Seleccionar todas</button>
+                <button type="button" onclick="limpiar()">Limpiar</button>
+            </div>
+
+            <!-- Submit button -->
+            <input type="submit" value="Guardar">
+        </form> 
+        <br>
+        <a href="{{ url_for('permisos') }}">Lista de permisos</a>
+    </div>
+</body>
+</html>

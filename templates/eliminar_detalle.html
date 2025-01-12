@@ -1,18 +1,30 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eliminar Detalle de Compra</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function confirmDeletion() {
+            return confirm('¿Estás seguro de que deseas eliminar este detalle?');
+        }
+    </script>
 </head>
 <body>
-    <div class="container">
     <h1>Eliminar Detalle de Compra</h1>
-    <p>¿Estás seguro de que deseas eliminar este detalle?</p>
-    <form action="{{ url_for('eliminar_detalle', id_detalle=detalle[0]) }}" method="post">
+    <form action="{{ url_for('delete_detalle', id_detalle=detalle[0]) }}" method="POST" onsubmit="return confirmDeletion();">
+        <p>¿Estás seguro de que deseas eliminar el detalle con el ID: {{ detalle[0] }}?</p>
+        <p>Pedido: {{ detalle[1] }}</p>
+        <p>Empleado: {{ detalle[2] }}</p>
+        <p>Producto: {{ detalle[3] }}</p>
+        <p>Cantidad: {{ detalle[4] }}</p>
+        <p>Precio Unitario: {{ detalle[5] }}</p>
+        <p>Subtotal: {{ detalle[6] }}</p>
+        <p>Impuesto: {{ detalle[7] }}</p>
+        <p>Total: {{ detalle[8] }}</p>
         <button type="submit">Eliminar</button>
-        <a href="{{ url_for('detalles') }}">Cancelar</a>
+        <a href="{{ url_for('detalles_compra') }}">Cancelar</a>
     </form>
-</div>
 </body>
 </html>

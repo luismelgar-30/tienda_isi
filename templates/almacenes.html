@@ -13,33 +13,58 @@
 </head>
 <body>
     <div class="container">
-        <h1>Lista de Almacenes</h1>
-        <div>
-            <br>
-            <a class="button-link ing" href="{{ url_for('index_almacenes') }}">Registrar almacen</a>
-            <br>
-            <br>
-            <a class="button-link ing" href="{{ url_for('historico_almacenes') }}">Histórico Almacenes</a>
-            <br>
-            <br>
-            <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
-            <br>
-            <br>
-            <input style="padding: 10px 15px; font-size: 16px; width: auto; max-width: 200px;" type="text" name="search" value="{{ search_query }}" placeholder="Buscar...">
-            <button style="padding: 10px 15px; font-size: 16px; width: auto; max-width: 100px;" type="submit">Buscar</button>
-        </div>
+        <h2>Almacenes</h2>
+
+        <!-- Formulario de búsqueda -->
+        <form method="get" action="{{ url_for('almacenes') }}">
+            {% if session.get('permiso_buscador_22') == 1 %}
+            <input type="text" name="search_query" placeholder="Buscar..." value="{{ search_query }}">
+            
+            <!-- Menú desplegable para seleccionar el campo de búsqueda -->
+            <select name="search_criteria">
+                <option value="nombre" {% if search_criteria == 'nombre' %}selected{% endif %}>Nombre</option>
+                <option value="direccion" {% if search_criteria == 'direccion' %}selected{% endif %}>Dirección</option>
+                <option value="id_sucursal" {% if search_criteria == 'id_sucursal' %}selected{% endif %}>Sucursal</option>
+            </select>
+        
+            <button type="submit">Buscar</button>
+            
+        </form>
+
         <br>
-        <select style="padding: 5px 7px; font-size: 10px; width: auto; max-width: 50px; display: block; margin: 0 auto;">
-            <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
-            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
-            <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
-        </select>
+        <!-- Formulario para seleccionar el número de elementos por página -->
+        <form method="get" action="{{ url_for('almacenes') }}">
+            <label for="per_page">Elementos por página:</label>
+            <select name="per_page" id="per_page" onchange="this.form.submit()">
+                <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+            </select>
+            <input type="hidden" name="search_query" value="{{ search_query }}">
+            <input type="hidden" name="search_criteria" value="{{ search_criteria }}">
+            {% endif %}
+        </form>
+
+        <br>
+        {% if session.get('permiso_crear_22') == 1 %}
+        <a class="button-link ing" href="{{ url_for('index_almacenes') }}">Registrar almacén</a>
+        {% endif %}
+        <a class="button-link ing" href="{{ url_for('historico_almacenes') }}">Histórico Almacenes</a>
+        <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+        {% if session.get('permiso_exportar_excel_22') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_excel_almacenes') }}">Descargar Lista en Excel</a>
+        {% endif %}
+        {% if session.get('permiso_exportar_pdf_22') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+        {% endif %}
+        <!-- Tabla de resultados -->
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Dirección</th>
+                    <th>Sucursal</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -49,25 +74,30 @@
                     <td>{{ almacen[0] }}</td>
                     <td>{{ almacen[1] }}</td>
                     <td>{{ almacen[2] }}</td>
+                    <td>{{ almacen[3] }}</td>
                     <td>
+                        {% if session.get('permiso_editar_22') == 1 %}
                         <a class="button-link baa" href="#" onclick="openWindow('{{ url_for('edit_almacen', id_almacen=almacen[0]) }}')">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
-                        <a class="button-link bee" href="#" onclick="openWindow('{{ url_for('eliminar_almacen', id_almacen=almacen[0]) }}')">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                        {% endif %}
+                        {% if session.get('permiso_eliminar_22') == 1 %}
+                        <a class="button-link bee" href="{{ url_for('eliminar_almacen', id_almacen=almacen[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <!-- Pagination -->
+        <!-- Controles de paginación -->
         <div class="pagination">
             {% if page > 1 %}
-            <a href="{{ url_for('almacenes', page=page-1, per_page=per_page) }}">&laquo; Anterior</a>
+            <a href="{{ url_for('almacenes', search_criteria=search_criteria, search_query=search_query, page=page-1, per_page=per_page) }}">Anterior</a>
             {% endif %}
             {% for p in range(1, total_pages + 1) %}
-            <a href="{{ url_for('almacenes', page=p, per_page=per_page) }}" {% if p == page %}class="active"{% endif %}>{{ p }}</a>
+            <a href="{{ url_for('almacenes', search_criteria=search_criteria, search_query=search_query, page=p, per_page=per_page) }}" {% if p == page %}class="active"{% endif %}>{{ p }}</a>
             {% endfor %}
             {% if page < total_pages %}
-            <a href="{{ url_for('almacenes', page=page+1, per_page=per_page) }}">Siguiente &raquo;</a>
+            <a href="{{ url_for('almacenes', search_criteria=search_criteria, search_query=search_query, page=page+1, per_page=per_page) }}">Siguiente</a>
             {% endif %}
         </div>
     </div>

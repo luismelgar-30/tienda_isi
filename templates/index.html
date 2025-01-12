@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Inicio | Grupo</title>
+</head>
+<body>
+    <!-- ........................................-->
+    <div class="carousel-buttons">
+        {% if session.get('permiso_producto') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5017/producto'">PRODUCTOS</button>  
+        {% endif %}
+        {% if session.get('permiso_inventario') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5001/inventario'">ALMACEN <br>CENTRAL</button>
+        {% endif %}
+        {% if session.get('permiso_empleado') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5003/empleados'">EMPLEADOS</button>
+        {% endif %}
+    </div>
+    <div class="carousel-buttons">
+        {% if session.get('permiso_cliente') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5004/cliente'">CLIENTES</button>
+        {% endif %}
+        {% if session.get('permiso_proveedor') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5005/proveedores'">PROVEEDORES</button>
+        {% endif %}
+        {% if session.get('permiso_sucursal') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5008/sucursales'">SUCURSALES</button>
+        {% endif %}
+    </div>
+    <div class="carousel-buttons">
+        {% if session.get('permiso_equipo') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5020/equipos'">EQUIPO</button>
+        {% endif %}
+        {% if session.get('permiso_pedido_cliente') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5010/pedidos'">COMPRA <br>CLIENTE</button>
+        {% endif %}
+        {% if session.get('permiso_devolucion_venta') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5026/devoluciones'">DEVOLUCION <br>VENTAS</button> 
+        {% endif %}
+    </div>
+    <div class="carousel-buttons">
+        {% if session.get('permiso_promocion') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5014/promocion'">DESCUENTOS</button>
+        {% endif %}
+        {% if session.get('permiso_pedido_proveedor') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5015/pedidos_compra_pv'">COMPRA <br>PROVEEDOR</button>
+        {% endif %}
+        {% if session.get('permiso_devolucion_compra') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5025/devoluciones'">DEVOLUCION <br>COMPRA</button> 
+        {% endif %}
+    </div>
+    <div class="carousel-buttons">
+        {% if session.get('permiso_almacen') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5018/almacenes'">ALMACENES</button>
+        {% endif %}
+        {% if session.get('permiso_capacitacion') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5021/capacitaciones'">CAPACITACION</button>
+        {% endif %}
+        {% if session.get('permiso_transportista') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5013/transportistas'">TRANSPORTISTAS</button>
+        {% endif %}
+    </div>
+    <div class="carousel-buttons">
+        {% if session.get('permiso_impuesto') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5024/impuesto'">IMPUESTOS</button>
+        {% endif %}
+        {% if session.get('permiso_mantenimiento') == 1 %}
+        <button onclick="window.location.href='http://127.0.0.1:5031/mantenimientos'">MANTENIMIENTO</button>
+        {% endif %}
+    </div>
+    <!-- ........................................-->
+    <nav class="sidebar">
+        <div class="sidebar-inner">
+            <header class="sidebar-header">
+                <button type="button" class="sidebar-burger" onclick="toggleSidebar()">
+                    <i class='bx bx-menu'></i>
+                </button>
+                <span class="sidebar-logo" style="color: #ffffff;">{{ primer_nombre }} {{ session.get('primer_apellido', '') }}</span> <!-- Muestra el nombre del usuario -->
+            </header>
+            
+            <nav class="sidebar-menu">
+                <button type="button" onclick="window.location.href='{{ url_for('cerrar_sesion') }}'">
+                    <i class='bx bx-exit'></i>
+                    <span>Cerrar Sesion</span>
+                </button>                
+                {% if session.get('permiso_usuario') == 1 %}
+                <button type="button" onclick="window.location.href='http://127.0.0.1:5034'">
+                    <i class='bx bx-user-circle'></i>
+                    <span>Usuarios</span>
+                </button>
+                {% endif %}
+                {% if session.get('permiso_sar') == 1 %}
+                <button type="button" onclick="window.location.href='http://127.0.0.1:5027/sars'">
+                    <i class='bx bxs-bank'></i>
+                    <span>SAR</span>
+                </button>
+                {% endif %}
+                {% if session.get('permiso_categoria') == 1 %}
+                <button type="button" onclick="window.location.href='http://127.0.0.1:5009/categorias'">
+                    <i class='bx bx-money-withdraw' style='color:#ffffff'></i>
+                    <span>CATEGORIAS</span>
+                </button>
+                {% endif %}
+                {% if session.get('permiso_distribucion') == 1 %}
+                <button type="button" onclick="window.location.href= 'http://127.0.0.1:5002/distribuciones'">
+                    <i class='bx bxs-coin'></i>
+                    <span>GESTION <br> ALMACENES</span>
+                </button>
+                {% endif %}
+                {% if session.get('permiso_puesto_trabajo') == 1 %}
+                <button type="button" onclick="window.location.href= 'http://127.0.0.1:5007/puesto_de_trabajo'">
+                    <i class='bx bx-paste'></i>
+                    <span>PUESTO DE <br> TRABAJO</span>
+                </button>
+                {% endif %}
+            </nav>
+        </div>
+    </nav>
+    <!-- ........................................-->
+    <script src="http://127.0.0.1:5501/script.js"></script>
+</body>
+</html>

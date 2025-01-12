@@ -9,22 +9,33 @@
     <div class="container">
         <h1>Editar Distribución</h1>
         <form action="{{ url_for('edit_distribucion', id_distribucion=distribucion[0]) }}" method="POST">
-            <label for="id_almacenes">ID del Almacén:</label>
-            <select id="id_almacenes" name="id_almacenes" required>
+            <label for="id_almacenes_origen">Almacén Origen:</label>
+            <select id="id_almacenes_origen" name="id_almacenes_origen" required>
                 {% for almacen in almacenes %}
                     <option value="{{ almacen[0] }}" {% if almacen[0] == distribucion[1] %}selected{% endif %}>{{ almacen[1] }}</option>
                 {% endfor %}
             </select>
-            <label for="id_producto">ID del Producto:</label>
-            <select id="id_producto" name="id_producto" required>
-                {% for producto in productos %}
-                    <option value="{{ producto[0] }}" {% if producto[0] == distribucion[2] %}selected{% endif %}>{{ producto[1] }}</option>
+            
+            <label for="id_almacenes_destino">Almacén Destino:</label>
+            <select id="id_almacenes_destino" name="id_almacenes_destino" required>
+                {% for almacen in almacenes %}
+                    <option value="{{ almacen[0] }}" {% if almacen[0] == distribucion[2] %}selected{% endif %}>{{ almacen[1] }}</option>
                 {% endfor %}
             </select>
+            
+            <label for="id_producto">Producto:</label>
+            <select id="id_producto" name="id_producto" required>
+                {% for producto in productos %}
+                    <option value="{{ producto[0] }}" {% if producto[0] == distribucion[3] %}selected{% endif %}>{{ producto[1] }}</option>
+                {% endfor %}
+            </select>
+            
             <label for="cantidad">Cantidad:</label>
-            <input type="number" id="cantidad" name="cantidad" value="{{ distribucion[3] }}" required>
+            <input type="number" id="cantidad" name="cantidad" value="{{ distribucion[4] }}" required>
+            
             <label for="fecha">Fecha:</label>
-            <input type="date" id="fecha" name="fecha" value="{{ distribucion[4] }}" required>
+            <input type="date" id="fecha" name="fecha" value="{{ distribucion[5] }}" required>
+            
             <button type="submit">Actualizar Distribución</button>
         </form>
     </div>

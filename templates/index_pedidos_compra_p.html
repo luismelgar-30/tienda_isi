@@ -4,61 +4,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Ingrese su producto al idea</title>
+    <title>Ingrese Nuevo Pedido</title>
     <script>
         function validarFormulario() {
-            var inputs = document.querySelectorAll('input[type="text"]');
-            var valid = true;
+    var inputs = document.querySelectorAll('input[type="text"]');
+    var valid = true;
+    var errorMessages = [];
 
-            inputs.forEach(function(input) {
-                var value = input.value;
+    inputs.forEach(function(input) {
+        var value = input.value;
 
-                // No se permiten caracteres especiales
-                if (/[^a-zA-Z0-9 ]/.test(value)) {
-                    alert("No se permiten caracteres especiales en " + input.name);
-                    valid = false;
-                }
-
-                // No se permiten letras repetidas más de dos veces consecutivas
-                if (/([a-zA-Z])\1\1/.test(value)) {
-                    alert("No se permite repetir la misma letra más de dos veces consecutivas en " + input.name);
-                    valid = false;
-                }
-
-                // Longitud mínima de 3 caracteres
-                if (value.length < 3) {
-                    alert(input.name + " debe tener al menos 3 caracteres");
-                    valid = false;
-                }
-
-                // No se permite repetir la misma vocal dos veces consecutivas
-                if (/([aeiouAEIOU])\1/.test(value)) {
-                    alert("No se permite repetir la misma vocal dos veces consecutivas en " + input.name);
-                    valid = false;
-                }
-            });
-
-            // Validación de fechas
-            var fechaPropuesta = new Date(document.getElementById('fecha_entrega').value);
-            var fechaImplementacion = new Date(document.getElementById('fecha_implementacion').value);
-            var fechaEvaluacion = new Date(document.getElementById('fecha_evaluacion').value);
-
-            if (fechaImplementacion < fechaPropuesta) {
-                alert("La fecha de implementación no puede ser antes que la fecha propuesta");
-                valid = false;
-            }
-            if (fechaEvaluacion < fechaPropuesta || fechaEvaluacion < fechaImplementacion) {
-                alert("La fecha de evaluación no puede ser antes que la fecha propuesta ni la fecha de implementación");
-                valid = false;
-            }
-
-            return valid;
+        // Excluir id_empleado de las validaciones
+        if (input.name === 'id_empleado') {
+            return; // Salta a la siguiente iteración
         }
+
+        // Solo aplicar validaciones si el campo no está vacío
+        if (value !== "") {
+            // No se permiten caracteres especiales
+            if (/[^a-zA-Z0-9-]/.test(value)) {
+                errorMessages.push("No se permiten caracteres especiales en " + input.name);
+                valid = false;
+            }
+
+            // No se permiten letras repetidas más de dos veces consecutivas
+            if (/([a-zA-Z])\1\1/.test(value)) {
+                errorMessages.push("No se permite repetir la misma letra más de dos veces consecutivas en " + input.name);
+                valid = false;
+            }
+
+            // Longitud mínima de 3 caracteres
+            if (value.length < 3) {
+                errorMessages.push(input.name + " debe tener al menos 3 caracteres");
+                valid = false;
+            }
+
+            // No se permite repetir la misma vocal dos veces consecutivas
+            if (/([aeiouAEIOU])\1/.test(value)) {
+                errorMessages.push("No se permite repetir la misma vocal dos veces consecutivas en " + input.name);
+                valid = false;
+            }
+        }
+    });
+
+    // Validación de número de factura (permite estar vacío)
+    var numeroFactura = document.getElementById('numero_factura').value;
+    var facturaRegex = /^FAC-\d{2}-\d{2}-\d{8}$|^FAC-\d{14}$/; // Formato FAC-xx-xx-xxxxxx o FAC-xxxxxxxxxxxxxx
+    if (numeroFactura !== "" && !facturaRegex.test(numeroFactura)) {
+        errorMessages.push("El número de factura debe seguir el formato: FAC-xx-xx-xxxxxx o FAC-xxxxxxxxxxxxxx");
+        valid = false;
+    }
+
+    // Validación de fechas
+    var fechaPedido = new Date(document.getElementById('fecha_pedido').value);
+    var fechaEntrega = document.getElementById('fecha_entrega').value ? new Date(document.getElementById('fecha_entrega').value) : null;
+    var fechaEntregaEstimada = document.getElementById('fecha_entrega_estimada').value ? new Date(document.getElementById('fecha_entrega_estimada').value) : null;
+
+    // Fecha de entrega estimada no puede ser antes de la fecha de pedido
+    if (fechaEntregaEstimada && fechaEntregaEstimada < fechaPedido) {
+        errorMessages.push("La fecha de entrega estimada no puede ser antes que la fecha del pedido");
+        valid = false;
+    }
+
+    // Fecha de entrega estimada tiene que ser al menos 5 días después de la fecha de pedido
+    var cincoDiasDespues = new Date(fechaPedido);
+    cincoDiasDespues.setDate(fechaPedido.getDate() + 5);
+    if (fechaEntregaEstimada && fechaEntregaEstimada < cincoDiasDespues) {
+        errorMessages.push("La fecha de entrega estimada debe ser al menos 5 días después de la fecha del pedido");
+        valid = false;
+    }
+
+    // Fecha de entrega no puede ser antes de la fecha de entrega estimada
+    if (fechaEntrega && fechaEntrega < fechaEntregaEstimada) {
+        errorMessages.push("La fecha de entrega no puede ser antes de la fecha de entrega estimada");
+        valid = false;
+    }
+
+    if (errorMessages.length > 0) {
+        alert(errorMessages.join("\n"));
+    }
+
+    return valid;
+}
+
+
+        function formatFacturaInput() {
+            var input = document.getElementById('numero_factura');
+            var rawValue = input.value.replace(/[^0-9]/g, ''); // Quita caracteres no numéricos
+
+            // Mantener el prefijo FAC- y limitar a 14 caracteres
+            var prefix = 'FAC-';
+            rawValue = rawValue.substring(0, 14);
+
+            // Formato para xx-xx-xxxxxx
+            if (rawValue.length >= 8) {
+                var part1 = rawValue.substring(0, 2); // Primeros dos dígitos
+                var part2 = rawValue.substring(2, 4); // Siguientes dos dígitos
+                var part3 = rawValue.substring(4); // Resto
+                input.value = `${prefix}${part1}-${part2}-${part3}`;
+            } else if (rawValue.length >= 4) {
+                var part1 = rawValue.substring(0, 2);
+                var part2 = rawValue.substring(2);
+                input.value = `${prefix}${part1}-${part2}`;
+            } else {
+                input.value = prefix + rawValue; // Mantener el prefijo FAC- si es menor a 4
+            }
+        }
+
+        async function guardarYRedirigir() {
+            var formulario = document.querySelector('form');
+            if (validarFormulario()) {
+                var formData = new FormData(formulario);
+                try {
+                    let response = await fetch(formulario.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+    
+                    // Verifica si la respuesta es exitosa
+                    if (response.ok) {
+                        // Redirigir después de que el formulario se haya enviado correctamente
+                        window.location.href = 'http://127.0.0.1:5022';
+                    } else {
+                        alert('Error al guardar el formulario.');
+                    }
+                } catch (error) {
+                    alert('Error al guardar el formulario.');
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            var fechaPedidoInput = document.getElementById('fecha_pedido');
+            var fechaEntregaEstimadaInput = document.getElementById('fecha_entrega_estimada');
+
+            // Establece la fecha actual como la fecha de pedido y desactiva el campo
+            var hoy = new Date().toISOString().split('T')[0];
+            fechaPedidoInput.value = hoy;
+            
+
+            // Calcula la fecha de entrega estimada (una semana después de la fecha de pedido)
+            var fechaEntregaEstimada = new Date();
+            fechaEntregaEstimada.setDate(fechaEntregaEstimada.getDate() + 7);
+            var fechaMaxima = new Date(fechaEntregaEstimada);
+            fechaMaxima.setDate(fechaMaxima.getDate() + 5); // Añade 5 días adicionales
+
+            fechaEntregaEstimadaInput.value = fechaEntregaEstimada.toISOString().split('T')[0];
+            fechaEntregaEstimadaInput.min = fechaEntregaEstimada.toISOString().split('T')[0];
+            fechaEntregaEstimadaInput.max = fechaMaxima.toISOString().split('T')[0];
+        });
+
+             
     </script>
+         <!-- Incluir CSS de Select2 -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <!-- Incluir jQuery (si aún no lo tienes) -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Incluir JS de Select2 -->
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script>
+                        $(document).ready(function() {
+                            $('#id_proveedor').select2({
+                                placeholder: "Seleccione un proveedor",
+                                allowClear: true
+                            });
+                        });
+                    </script>
+        
 </head>
 <body>
     <div class="container">
-        <h2>Ingrese una idea</h2>
+        <h2>Ingrese Nuevo Pedido</h2>
         {% with messages = get_flashed_messages() %}
           {% if messages %}
             <ul>
@@ -71,16 +186,27 @@
         <form onsubmit="return validarFormulario()" action="{{ url_for('submit') }}" method="post">
             <label for="id_proveedor">Id Proveedor:</label>
             <select id="id_proveedor" name="id_proveedor" required>
+                <option value="">Seleccione un proveedor</option>
                 {% for proveedor in proveedores %}
                 <option value="{{ proveedor[0] }}">{{ proveedor[1] }}</option>
                 {% endfor %}
             </select><br><br>
 
-            <label for="fecha_pedido">Fecha Pedido:</label>
-            <input type="date" id="fecha_pedido" name="fecha_pedido" required><br><br>
+            <label for="id_empleado">Empleado:</label>
+            <input type="text" name="id_empleado" value="{{ session.nombre_empleado }} {{ session.apellido_empleado }}" readonly><br><br>
 
-            <label for="fecha_entrega">Fecha Entrega:</label>
-            <input type="date" id="fecha_entrega" name="fecha_entrega" required><br><br>
+
+            <label for="numero_factura">Numero de Factura:</label>
+            <input type="text" id="numero_factura" name="numero_factura" value="" oninput="formatFacturaInput()"><br><br>
+
+            <label for="fecha_pedido">Fecha Pedido:</label>
+            <input type="date"   id="fecha_pedido" name="fecha_pedido" required readonly><br><br>
+
+            <label for="fecha_entrega_estimada">Fecha Entrega Estimada:</label>
+            <input type="date" id="fecha_entrega_estimada" name="fecha_entrega_estimada" required><br><br>
+
+            <label for="fecha_entrega">Fecha de Recepcion:</label>
+            <input type="date" id="fecha_entrega" name="fecha_entrega"><br><br>
 
             <label for="id_metodo">ID Metodo:</label>
             <select id="id_metodo" name="id_metodo" required>
@@ -90,16 +216,19 @@
             </select><br><br>
 
             <label for="id_estado">ID Estado:</label>
-            <select id="id_estado" name="id_estado" required>
+            <select id="id_estado_display" name="id_estado_display" required disabled style="background-color: #f0f0f0; color: #555;">
                 {% for estado in estados %}
                 <option value="{{ estado[0] }}">{{ estado[1] }}</option>
                 {% endfor %}
-            </select><br><br>
+            </select>
+            <input type="hidden" name="id_estado" value="{{ estados[0][0] }}"> <!-- Usa el valor que necesites aquí -->
+            <br><br>
 
-            <input type="submit" value="Guardar">
+            
+            <button type="button" onclick="guardarYRedirigir()">Ir a Detalles</button>
         </form>
         <br>
-        <a href="{{ url_for('pedidos_compra_pv') }}">Lista de productos en el idea</a>
+        <a href="{{ url_for('pedidos_compra_pv') }}">Lista de pedidos de Compra</a>
     </div>
 </body>
 </html>

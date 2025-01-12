@@ -4,6 +4,72 @@
     <meta charset="UTF-8">
     <title>Editar Mantenimiento</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function setMinDate() {
+            const today = new Date();
+            const lastMonth = new Date(today);
+            lastMonth.setMonth(today.getMonth() - 1);
+
+            const lastMonthString = lastMonth.toISOString().split('T')[0];
+
+            const dateInput = document.getElementById('fecha');
+            dateInput.setAttribute('min', lastMonthString);
+        }
+
+        function validateForm(event) {
+            let errors = [];
+            const form = event.target;
+
+            // Validar ID del Equipo
+            const idEquipo = form['id_equipo'].value;
+            if (!idEquipo) {
+                errors.push('Seleccione un ID de Equipo.');
+            }
+
+            // Validar Fecha
+            const fecha = form['fecha'].value;
+            const minDate = form['fecha'].getAttribute('min');
+            if (!fecha || fecha < minDate) {
+                errors.push('La fecha debe ser posterior a un mes desde hoy.');
+            }
+
+            // Validar Tipo
+            const tipo = form['tipo'].value;
+            if (!tipo) {
+                errors.push('Seleccione un tipo de mantenimiento.');
+            }
+
+            // Validar Detalles
+            const detalles = form['detalles'].value.trim();
+            const detallesPattern = /^[a-zA-Z\s,]{8,50}$/;
+            if (!detalles || !detallesPattern.test(detalles)) {
+                errors.push('Los detalles deben tener entre 8 y 50 caracteres, solo letras y comas.');
+            }
+
+            // Validar Estado
+            const estado = form['estado'].value;
+            if (!estado) {
+                errors.push('Seleccione el estado del mantenimiento.');
+            }
+
+            // Validar Documento
+            const documento = form['documento'].value;
+            const documentoPattern = /^(0[1-9]|1[0-8])\d{11}$/;
+            if (!documento || !documentoPattern.test(documento)) {
+                errors.push('El documento debe contener exactamente 13 dígitos, iniciar con un número entre 01 y 18, y ser un número positivo.');
+            }
+
+            if (errors.length > 0) {
+                event.preventDefault(); // Evitar el envío del formulario
+                alert(errors.join('\n')); // Mostrar todos los errores en una alerta
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setMinDate();
+            document.querySelector('form').addEventListener('submit', validateForm);
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -42,11 +108,11 @@
             </select>
             
             <label for="documento">Documento:</label>
-            <input type="text" id="documento" name="documento" value="{{ mantenimiento[6] }}" required pattern="^[01]\d{12}$" title="El documento debe contener exactamente 13 dígitos, iniciar con 0 o 1 y ser un número positivo.">
+            <input type="text" id="documento" name="documento" value="{{ mantenimiento[6] }}" required pattern="^(0[1-9]|1[0-8])\d{11}$" title="El documento debe contener exactamente 13 dígitos, iniciar con un número entre 01 y 18, y ser un número positivo.">
             
             <button type="submit">Actualizar Mantenimiento</button>
         </form>
-        <a href="{{ url_for('mantenimientos') }}">Regresar</a>
+        <a href="{{ url_for('mantenimientos') }}" onclick="window.close()">Volver a la lista</a>
     </div>
 </body>
 </html>

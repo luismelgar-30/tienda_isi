@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Permisos</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function openWindow(url) {
+            window.open(url, 'Ventana', 'width=800,height=600');
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Permisos para Acciones</h2>
+
+        <!-- Formulario de búsqueda -->
+        <form method="get" action="{{ url_for('permisos') }}">
+            <input type="text" name="search_query" placeholder="Buscar..." value="{{ search_query }}">
+            
+            <!-- Menú desplegable para seleccionar el campo de búsqueda -->
+            <select name="search_criteria">
+                <option value="nombre_permisos" {% if search_criteria == 'nombre_permisos' %}selected{% endif %}>Nombre de la permisos</option>
+                <option value="Descripcion" {% if search_criteria == 'Descripcion' %}selected{% endif %}>Descripción</option>
+            </select>
+            
+            <button type="submit">Buscar</button>
+        </form>
+
+        <br>
+        <!-- Formulario para seleccionar el número de elementos por página -->
+        <form method="get" action="{{ url_for('permisos') }}">
+            <label for="per_page">Elementos por página:</label>
+            <select name="per_page" id="per_page" onchange="this.form.submit()">
+                <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+            </select>
+            <input type="hidden" name="search_query" value="{{ search_query }}">
+            <input type="hidden" name="search_criteria" value="{{ search_criteria }}">
+        </form>
+
+        <br>
+        <a class="button-link ing" href="{{ url_for('index_permisos') }}">Agregar Permisos de acciones a un rol</a>
+        <a class="button-link ing2" href="http://127.0.0.1:5038/roles">Volver a Roles</a>
+        <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+        <!-- Tabla de resultados -->
+        <table>
+            <thead>
+                <tr>
+                    <th>ID de Permiso</th>
+                    <th>Rol</th>
+                    <th>Pantalla</th>
+                    <th>Permiso Crear</th>
+                    <th>Permiso Editar</th>
+                    <th>Permiso Eliminar</th>
+                    <th>Permiso Ver</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for permisos in permisos %}
+                <tr>
+                    <td>{{ permisos[0] }}</td>
+                    <td>{{ permisos[1] }}</td>
+                    <td>{{ permisos[6] }}</td>
+                    <td>{{ 'Sí' if permisos[2] == 1 else 'No' }}</td>
+                    <td>{{ 'Sí' if permisos[3] == 1 else 'No' }}</td>
+                    <td>{{ 'Sí' if permisos[4] == 1 else 'No' }}</td>
+                    <td>{{ 'Sí' if permisos[5] == 1 else 'No' }}</td>
+                    
+                    <td>
+                        <a class="button-link baa" href="#" onclick="openWindow('{{ url_for('edit_permisos', id_permiso=permisos[0]) }}')">Gestionar Permisos Del Rol <i class='bx bx-edit' style='color:#000000'></i></a>
+                    </td>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Paginación -->
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('permisos', page=page-1, search_criteria=search_criteria, search_query=search_query) }}">Anterior</a>
+            {% endif %}
+            {% for i in range(1, total_pages+1) %}
+                <a href="{{ url_for('permisos', page=i, search_criteria=search_criteria, search_query=search_query) }}" 
+                {% if i == page %}class="active"{% endif %}>{{ i }}</a>
+            {% endfor %}
+            {% if page < total_pages %}
+                <a href="{{ url_for('permisos', page=page+1, search_criteria=search_criteria, search_query=search_query) }}">Siguiente</a>
+            {% endif %}
+        </div>
+
+    </div>
+</body>
+</html>

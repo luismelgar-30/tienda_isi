@@ -1,73 +1,131 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Detalle de Compra</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script>
-        function fetchPrecioUnitario() {
-            var idProducto = document.getElementById('id_producto').value;
-            fetch(`/get_precio/${idProducto}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('precio_unitario').value = data.precio_unitario;
-                    calcularSubtotalYTotal();
-                });
+        function calculateSubtotal() {
+            var cantidad = parseFloat(document.getElementById('cantidad').value) || 0;
+            var precio_unitario = parseFloat(document.getElementById('precio_unitario').value) || 0;
+            var subtotal = cantidad * precio_unitario;
+            document.getElementById('subtotal').value = subtotal.toFixed(2);
+            calculateTotal();
         }
 
-        function calcularSubtotalYTotal() {
-            var cantidad = parseFloat(document.getElementById('cantidad').value);
-            var precioUnitario = parseFloat(document.getElementById('precio_unitario').value);
-            var subtotal = cantidad * precioUnitario;
-            document.getElementById('subtotal').value = subtotal.toFixed(2);
-
-            var idImpuesto = document.getElementById('id_impuesto').value;
-            var tasaImpuesto = parseFloat(document.querySelector(`#id_impuesto option[value="${idImpuesto}"]`).textContent);
-            var total = (subtotal * impuesto) + (subtotal);
+        function calculateTotal() {
+            var subtotal = parseFloat(document.getElementById('subtotal').value) || 0;
+            var impuesto = parseFloat(document.getElementById('id_impuesto').selectedOptions[0].dataset.tasa) || 0;
+            impuesto = impuesto / 100; // Convertir el impuesto a decimal
+            var total = (subtotal * impuesto) + subtotal;
             document.getElementById('total').value = total.toFixed(2);
         }
+
+        function updatePrecioUnitario() {
+    var id_producto = document.getElementById('id_producto').value;
+    if (id_producto) {
+        fetch('/get_precio/' + id_producto)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('precio_unitario').value = data.precio_unitario.toFixed(2);
+                var cantidad_en_stock = data.cantidad_en_stock;
+                var stock_maximo = data.stock_maximo;
+                var cantidad_disponible = stock_maximo - cantidad_en_stock;
+
+                if (cantidad_disponible <= 0) {
+                    document.getElementById('cantidad').value = '';
+                    document.getElementById('cantidad').disabled = true;
+                    document.getElementById('cantidad_disponible').textContent = "Este producto ya alcanzó el stock máximo.";
+                } else {
+                    document.getElementById('cantidad').max = cantidad_disponible;
+                    document.getElementById('cantidad').disabled = false;
+                    document.getElementById('cantidad_disponible').textContent = `Cantidad en stock: ${cantidad_en_stock}. Puede comprar hasta ${cantidad_disponible} unidades.`;
+                }
+                calculateSubtotal();
+            })
+            .catch(error => console.error('Error:', error));
+    }
+}
+
+        function validateCantidad() {
+            var cantidadField = document.getElementById('cantidad');
+            var cantidadValue = parseFloat(cantidadField.value);
+
+            if (cantidadValue > 1000) {
+                cantidadField.value = 1000;
+            }
+
+            // Limitar a 4 dígitos
+            if (cantidadField.value.length > 4) {
+                cantidadField.value = cantidadField.value.slice(0, 4);
+            }
+
+            calculateSubtotal();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            $('#id_producto').select2({
+                placeholder: "Seleccione un producto",
+                allowClear: true
+            });
+
+            $('#id_producto').on('change', function() {
+                updatePrecioUnitario();
+            });
+
+            updatePrecioUnitario(); // Actualiza el precio unitario al cargar la página
+        });
     </script>
+    <!-- Incluir CSS de Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Incluir jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Incluir JS de Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <body>
     <div class="container">
-    <h1>Editar Detalle de Compra</h1>
-    <form action="{{ url_for('edit_detalle', id_detalle=detalle[0]) }}" method="post">
-        <label for="id_pedido">Pedido:</label>
-        <select name="id_pedido" id="id_pedido">
-            {% for pedido in pedidos %}
-                <option value="{{ pedido[0] }}" {% if pedido[0] == detalle[1] %} selected {% endif %}>{{ pedido[0] }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <label for="id_producto">Producto:</label>
-        <select name="id_producto" id="id_producto" onchange="fetchPrecioUnitario()">
-            {% for producto in productos %}
-                <option value="{{ producto[0] }}" {% if producto[0] == detalle[2] %} selected {% endif %}>{{ producto[1] }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <label for="cantidad">Cantidad:</label>
-        <input type="number" name="cantidad" id="cantidad" value="{{ detalle[3] }}" oninput="calcularSubtotalYTotal()">
-        <br>
-        <label for="precio_unitario">Precio Unitario:</label>
-        <input type="text" name="precio_unitario" id="precio_unitario" value="{{ detalle[4] }}">
-        <br>
-        <label for="subtotal">Subtotal:</label>
-        <input type="text" name="subtotal" id="subtotal" value="{{ detalle[5] }}">
-        <br>
-        <label for="id_impuesto">Impuesto:</label>
-        <select name="id_impuesto" id="id_impuesto" onchange="calcularSubtotalYTotal()">
-            {% for impuesto in impuestos %}
-                <option value="{{ impuesto[0] }}" {% if impuesto[0] == detalle[6] %} selected {% endif %}>{{ impuesto[1] }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <label for="total">Total:</label>
-        <input type="text" name="total" id="total" value="{{ detalle[7] }}">
-        <br>
-        <button type="submit">Actualizar Detalle</button>
-    </form>
-    <a href="{{ url_for('detalles') }}">Volver</a>
-</div>
+        <h1>Editar Detalle de Compra</h1>
+        <form action="{{ url_for('edit_detalle', id_detalle=detalle[0]) }}" method="POST">
+            <label for="id_pedido">Pedido:</label>
+            <select id="id_pedido" name="id_pedido" required>
+                {% for pedido in pedidos %}
+                    <option value="{{ pedido[0] }}" {% if pedido[0] == detalle[2] %}selected{% endif %}>{{ pedido[0] }}</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="id_producto">Producto:</label>
+            <select id="id_producto" name="id_producto" onchange="updatePrecioUnitario()" required>
+                {% for producto in productos %}
+                    <option value="{{ producto[0] }}" {% if producto[0] == detalle[3] %}selected{% endif %}>{{ producto[1] }}</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="cantidad">Cantidad:</label>
+            <input type="number" id="cantidad" name="cantidad" min="0" max="1000" step="any" value="{{ detalle[6] }}" oninput="validateCantidad()" required><br>
+            <span id="cantidad_disponible"></span><br>
+
+            <label for="precio_unitario">Precio Unitario:</label>
+            <input type="number" id="precio_unitario" name="precio_unitario" step="any" value="{{ detalle[4] }}" required><br>
+
+            <label for="subtotal">Subtotal:</label>
+            <input type="number" id="subtotal" name="subtotal" step="any" value="{{ detalle[5] }}" readonly><br>
+
+            <label for="id_impuesto">Impuesto:</label>
+            <select id="id_impuesto" name="id_impuesto" onchange="calculateTotal()" required>
+                {% for impuesto in impuestos %}
+                    <option value="{{ impuesto[0] }}" data-tasa="{{ impuesto[1] }}" {% if impuesto[0] == detalle[7] %}selected{% endif %}>{{ impuesto[1] }}%</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="total">Total:</label>
+            <input type="number" id="total" name="total" step="any" value="{{ detalle[8] }}" readonly><br>
+
+            <button type="submit">Guardar Cambios</button>
+        </form>
+
+        <a href="{{ url_for('detalles_compra') }}">Volver a la lista de detalles</a>
+    </div>
 </body>
 </html>

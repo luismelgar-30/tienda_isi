@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Editar detalle_p de Compra</title>
+    <title>Editar detalle de Compra</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script>
         function fetchPrecioUnitario() {
@@ -23,51 +23,63 @@
 
             var idImpuesto = document.getElementById('id_impuesto').value;
             var tasaImpuesto = parseFloat(document.querySelector(`#id_impuesto option[value="${idImpuesto}"]`).textContent);
-            var total = (subtotal * tasaImpuesto) + (subtotal);
+            var total = (subtotal * tasaImpuesto) + subtotal;
             document.getElementById('total').value = total.toFixed(2);
         }
+
+        // Funciones para simular readonly en select
+        function setReadonly(selectElement) {
+            selectElement.addEventListener('focus', function() {
+                this.blur(); // Evita que el usuario interactúe con el campo
+            });
+        }
+
+        // Llamar a la función para cada campo select
+        window.onload = function() {
+            setReadonly(document.getElementById('id_pedido'));
+            setReadonly(document.getElementById('id_producto'));
+        };
     </script>
 </head>
 <body>
     <div class="container">
-    <h1>Editar detalle_p de Compra</h1>
-    <form action="{{ url_for('edit_detalle_p', id_detalle=detalle_p[0]) }}" method="post">
-        <label for="id_pedido">Pedido:</label>
-        <select name="id_pedido" id="id_pedido">
-            {% for pedido in pedidos %}
-                <option value="{{ pedido[0] }}" {% if pedido[0] == detalle_p[1] %} selected {% endif %}>{{ pedido[0] }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <label for="id_producto">Producto:</label>
-        <select name="id_producto" id="id_producto" onchange="fetchPrecioUnitario()">
-            {% for producto in productos %}
-                <option value="{{ producto[0] }}" {% if producto[0] == detalle_p[2] %} selected {% endif %}>{{ producto[1] }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <label for="cantidad">Cantidad:</label>
-        <input type="number" name="cantidad" id="cantidad" value="{{ detalle_p[3] }}" oninput="calcularSubtotalYTotal()">
-        <br>
-        <label for="precio_unitario">Precio Unitario:</label>
-        <input type="text" name="precio_unitario" id="precio_unitario" value="{{ detalle_p[4] }}">
-        <br>
-        <label for="subtotal">Subtotal:</label>
-        <input type="text" name="subtotal" id="subtotal" value="{{ detalle_p[5] }}">
-        <br>
-        <label for="id_impuesto">Impuesto:</label>
-        <select name="id_impuesto" id="id_impuesto" onchange="calcularSubtotalYTotal()">
-            {% for impuesto in impuestos %}
-                <option value="{{ impuesto[0] }}" {% if impuesto[0] == detalle_p[6] %} selected {% endif %}>{{ impuesto[1] }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <label for="total">Total:</label>
-        <input type="text" name="total" id="total" value="{{ detalle_p[7] }}">
-        <br>
-        <button type="submit">Actualizar detalle_p</button>
-    </form>
-    <a href="{{ url_for('detalles_p') }}">Volver</a>
-</div>
+        <h1>Editar detalle de Compra</h1>
+        <form action="{{ url_for('edit_detalle_p', id_detalle=detalle_p[0]) }}" method="post">
+            <label for="id_pedido">Pedido:</label>
+            <input type="text" name="id_pedido" id="id_pedido" value="{{ detalle_p[1] }}" readonly>
+            <br>
+
+            <label for="id_producto">Producto:</label>
+            <select name="id_producto" id="id_producto" readonly>
+                {% for producto in productos %}
+                    <option value="{{ producto[0] }}" {% if producto[0] == detalle_p[2] %} selected {% endif %}>{{ producto[1] }}</option>
+                {% endfor %}
+            </select>
+            <br>
+
+            <label for="cantidad">Cantidad:</label>
+            <input type="number" name="cantidad" id="cantidad" min="1" max="1000" value="{{ detalle_p[3] }}" oninput="calcularSubtotalYTotal(); if(this.value.length > 4) this.value = this.value.slice(0, 4);" maxlength="4">
+
+            <br>
+            <label for="precio_unitario">Precio Unitario:</label>
+            <input type="text" name="precio_unitario" id="precio_unitario" value="{{ detalle_p[4] }}" readonly>
+            <br>
+            <label for="subtotal">Subtotal:</label>
+            <input type="text" name="subtotal" id="subtotal" value="{{ detalle_p[5] }}" readonly>
+            <br>
+            <label for="id_impuesto">Impuesto:</label>
+            <select name="id_impuesto" id="id_impuesto" onchange="calcularSubtotalYTotal()">
+                {% for impuesto in impuestos %}
+                    <option value="{{ impuesto[0] }}" {% if impuesto[0] == detalle_p[6] %} selected {% endif %}>{{ impuesto[1] }}%</option>
+                {% endfor %}
+            </select>
+            <br>
+            <label for="total">Total:</label>
+            <input type="text" name="total" id="total" value="{{ detalle_p[7] }}" readonly>
+            <br>
+            <button type="submit">Actualizar detalle de compra</button>
+        </form>
+        <a href="{{ url_for('detalles_p') }}">Volver</a>
+    </div>
 </body>
 </html>

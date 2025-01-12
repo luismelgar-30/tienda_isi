@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Editar Devolución de Ventas</title>
+    <script>
+        async function loadDetalles(selectedDetalle = null) {
+            const idPedido = document.getElementById('id_pedido').value;
+            const response = await fetch(`/detalles/${idPedido}`);
+            const detalles = await response.json();
+            const detallesSelect = document.getElementById('id_detalle');
+            detallesSelect.innerHTML = ''; // Limpiar el select actual
+    
+            detalles.forEach(detalle => {
+                const option = document.createElement('option');
+                option.value = detalle.id_detalle; // Asegúrate de que aquí esté la propiedad correcta
+                option.text = `${detalle.nombre_producto} - Cantidad: ${detalle.cantidad}`; // Muestra el nombre del producto
+                if (detalle.id_detalle == selectedDetalle) {
+                    option.selected = true;
+                }
+                detallesSelect.add(option);
+            });
+        }
+
+        // Cargar los detalles cuando la página se carga por primera vez
+        window.onload = function() {
+            const selectedDetalle = {{ devolucion[2] }}; // El detalle seleccionado actualmente
+            loadDetalles(selectedDetalle);
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Editar Devolución de Ventas</h2>
+
+        <form method="post" action="{{ url_for('edit_devolucion_ventas', id_devolucion=devolucion[0]) }}">
+            <label for="id_pedido">ID Pedido:</label>
+            <select id="id_pedido" name="id_pedido" onchange="loadDetalles()" required>
+                <option value="" disabled>Seleccionar</option>
+                {% for pedido in pedidos %}
+                    <option value="{{ pedido[0] }}" {% if pedido[0] == devolucion[1] %}selected{% endif %}>{{ pedido[0] }}</option> <!-- Muestra solo el ID del pedido -->
+                {% endfor %}
+            </select>
+
+            <label for="id_detalle">ID Detalle:</label>
+            <select id="id_detalle" name="id_detalle" required>
+                <option value="" disabled selected>Selecciona un detalle</option>
+                <!-- Los detalles se cargarán dinámicamente con JavaScript -->
+            </select>
+
+            <label for="fecha_devolucion">Fecha Devolución:</label>
+            <input type="date" name="fecha_devolucion" value="{{ devolucion[3] }}" required>
+
+            <label for="motivo">Motivo:</label>
+            <input type="text" name="motivo" value="{{ devolucion[4] }}" required>
+
+            <label for="cantidad_devuelta">Cantidad Devuelta:</label>
+            <input type="number" name="cantidad_devuelta" value="{{ devolucion[5] }}" required>
+
+            <button type="submit">Actualizar Devolución</button>
+        </form>
+        <br>
+        <a href="{{ url_for('devoluciones_ventas') }}">Lista de Devoluciones</a>
+    </div>
+</body>
+</html>

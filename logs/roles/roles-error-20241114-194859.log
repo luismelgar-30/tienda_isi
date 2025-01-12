@@ -1,0 +1,1 @@
+20241114-194859 - ERROR: Error al Actualizar en la base de datos: 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails (`proyecto_is1`.`pantalla`, CONSTRAINT `pantalla_ibfk_1` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`id_rol`))

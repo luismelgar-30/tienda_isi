@@ -4,6 +4,31 @@
     <meta charset="UTF-8">
     <title>Ingresar Transportista</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function validateForm(event) {
+            var nombreEmpresa = document.getElementById('nombre_empresa').value;
+            var telefono = document.getElementById('Telefono').value;
+
+            // Validación para el campo nombre_empresa
+            var nombreEmpresaRegex = /^[A-Za-z\s]{5,20}$/;
+            var threeConsecutiveLetters = /([A-Za-z])\1{2}/;
+            if (!nombreEmpresaRegex.test(nombreEmpresa) || threeConsecutiveLetters.test(nombreEmpresa)) {
+                alert('El nombre de la empresa debe tener entre 5 y 20 caracteres, solo debe contener letras y espacios, y no debe tener más de tres letras seguidas.');
+                event.preventDefault();
+                return false;
+            }
+
+            // Validación para el campo telefono
+            var telefonoRegex = /^[23789][0-9]{7}$/;
+            if (!telefonoRegex.test(telefono.replace(/-/g, ''))) {
+                alert('El teléfono debe tener exactamente 8 números, comenzar con 2, 3, 7, 8, o 9.');
+                event.preventDefault();
+                return false;
+            }
+
+            return true;
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -17,7 +42,7 @@
             </ul>
           {% endif %}
         {% endwith %}
-        <form action="{{ url_for('submit_transportista') }}" method="post">
+        <form action="{{ url_for('submit_transportista') }}" method="post" onsubmit="return validateForm(event)">
             <label for="nombre_empresa">Nombre de la Empresa:</label>
             <input type="text" id="nombre_empresa" name="nombre_empresa" required><br><br>
             

@@ -1,17 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Ingresar puesto de trabajo</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializa la fecha actual en el campo de fecha
+            var fechaInput = document.getElementById('fecha');
+            var hoy = new Date().toISOString().split('T')[0];
+            fechaInput.setAttribute('min', hoy);
+            fechaInput.value = hoy;
+
+            // Función para validar el campo Hora de Inicio y Hora de Fin
+            function validateHora() {
+                var horaInicioInput = document.getElementById('hora_inicio');
+                var horaFinInput = document.getElementById('hora_fin');
+
+                var horaInicio = horaInicioInput.value;
+                var horaFin = horaFinInput.value;
+
+                if (horaInicio && horaFin) {
+                    var [hInicio, mInicio] = horaInicio.split(':').map(Number);
+                    var [hFin, mFin] = horaFin.split(':').map(Number);
+
+                    if ((mInicio !== 0 && mInicio !== 30) || (mFin !== 0 && mFin !== 30)) {
+                        alert("Las horas deben ser exactas o en minutos 30.");
+                        return false;
+                    }
+
+                    var fechaHoraInicio = new Date();
+                    fechaHoraInicio.setHours(hInicio, mInicio, 0);
+
+                    var fechaHoraFin = new Date(fechaHoraInicio.getTime() + 8 * 60 * 60 * 1000);
+                    var horasFin = fechaHoraFin.getHours().toString().padStart(2, '0');
+                    var minutosFin = fechaHoraFin.getMinutes().toString().padStart(2, '0');
+
+                    if (horaFin !== horasFin + ':' + minutosFin) {
+                        alert("La Hora de Fin debe ser exactamente 8 horas después de la Hora de Inicio.");
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // Función para validar el campo Puesto de Trabajo
+            function validatePuestoTrabajo() {
+                var puestoTrabajo = document.getElementById('puesto_trabajo').value;
+                var puestoTrabajoRegex = /^[A-Za-z\s]{4,20}$/; // Solo letras y espacios, entre 4 y 20 caracteres
+                var repetidosRegex = /(.)\1{2}/; // No permitir más de 3 caracteres repetidos
+
+                if (!puestoTrabajoRegex.test(puestoTrabajo)) {
+                    alert("El Puesto de Trabajo debe contener solo letras y espacios, entre 4 y 20 caracteres.");
+                    return false;
+                }
+
+                if (repetidosRegex.test(puestoTrabajo)) {
+                    alert("El Puesto de Trabajo no puede contener más de tres letras o espacios consecutivos.");
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Función para validar el campo Salario
+            function validateSalario() {
+                var salario = parseFloat(document.getElementById('salario').value);
+                if (isNaN(salario) || salario < 7000 || salario > 125000) {
+                    alert("El Salario debe estar entre 7,000 y 125,000.");
+                    return false;
+                }
+                return true;
+            }
+
+            document.querySelector('form').addEventListener('submit', function(event) {
+                if (!validateHora() || !validatePuestoTrabajo() || !validateSalario()) {
+                    event.preventDefault();  // Evita el envío del formulario si hay errores
+                }
+            });
+
+            // Función para calcular y llenar la Hora de Fin automáticamente
+            document.getElementById('hora_inicio').addEventListener('input', function() {
+                var horaInicio = this.value;
+                if (horaInicio) {
+                    var [hInicio, mInicio] = horaInicio.split(':').map(Number);
+                    var fechaHoraInicio = new Date();
+                    fechaHoraInicio.setHours(hInicio, mInicio, 0);
+
+                    var fechaHoraFin = new Date(fechaHoraInicio.getTime() + 8 * 60 * 60 * 1000);
+                    var horasFin = fechaHoraFin.getHours().toString().padStart(2, '0');
+                    var minutosFin = fechaHoraFin.getMinutes().toString().padStart(2, '0');
+
+                    document.getElementById('hora_fin').value = horasFin + ':' + minutosFin;
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="container">
         <h2>Ingresar puesto de trabajo</h2>
         {% with messages = get_flashed_messages() %}
           {% if messages %}
-            <ul>
+            <ul class="error-messages">
             {% for message in messages %}
               <li>{{ message }}</li>
             {% endfor %}
@@ -19,65 +111,23 @@
           {% endif %}
         {% endwith %}
         <form action="{{ url_for('submit') }}" method="post">
-         
-    
-            <label for="id_documento">Empleados:</label>
-            <select id="id_documento" name="id_documento" required>
-                {% for documento_empleado in documento_empleado %}
-                <option value="{{ documento_empleado[0] }}">{{ documento_empleado[1] }}</option>
-                {% endfor %}
-            </select>
-    
-            <label for="documento">Documento:</label>
-            <input type="text" id="documento" name="documento" required>
 
-            <label for="fecha">Fecha:</label>
-            <input type="date" id="fecha" name="fecha" required><br><br>
-    
+            <label for="puesto_trabajo">Puesto de Trabajo:</label>
+            <input type="text" id="puesto_trabajo" name="puesto_trabajo" required>
+
             <label for="hora_inicio">Hora de Inicio:</label>
             <input type="time" id="hora_inicio" name="hora_inicio" required><br><br>
     
             <label for="hora_fin">Hora de Fin:</label>
-            <input type="time" id="hora_fin" name="hora_fin"><br><br>
-
-            <label for="puesto_trabajo">Puesto Trabajo:</label>
-            <input type="text" id="puesto_trabajo" name="puesto_trabajo" required>
+            <input type="time" id="hora_fin" name="hora_fin" required><br><br>
 
             <label for="salario">Salario:</label>
-            <input type="text" id="salario" name="salario" required>
+            <input type="number" id="salario" name="salario" step="0.01" required>
     
-
             <input type="submit" value="Guardar">
         </form>
         <br>
-        <a href="{{ url_for('puesto_de_trabajo') }}">Lista de puesto de trabajo</a>
-        <a class="ing" href="{{ url_for('index_puesto_de_trabajo') }}">INICIO</a>
+        <a href="{{ url_for('puesto_de_trabajo') }}">Lista de puestos de trabajo</a>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var documento_empleadoSelect = document.getElementById('id_documento');
-            var documentoInput = document.getElementById('documento');
-    
-            documento_empleadoSelect.addEventListener('change', function() {
-                var selecteddocumento_empleadoId = this.value;
-                if (selecteddocumento_empleadoId) {
-                    fetch(`/get_documento/${selecteddocumento_empleadoId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            documentoInput.value = data.documento ? data.documento : '';
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Hubo un error al obtener el documento del empleado.');
-                            documentoInput.value = '';
-                        });
-                } else {
-                    documentoInput.value = '';
-                }
-            });
-        });
-    </script>
-    
 </body>
 </html>

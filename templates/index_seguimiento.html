@@ -4,6 +4,68 @@
     <meta charset="UTF-8">
     <title>Ingresar Seguimiento de Envío</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializa la fecha actual
+            var today = new Date().toISOString().split('T')[0];
+            
+            // Establece la fecha de envío predeterminada y las restricciones
+            var fechaEnvioInput = document.getElementById('fecha_envio');
+            fechaEnvioInput.value = today;
+            fechaEnvioInput.setAttribute('min', today);
+            
+            var maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 7); // Máximo es una semana después
+            fechaEnvioInput.setAttribute('max', maxDate.toISOString().split('T')[0]);
+
+            // Calcula y establece la fecha estimada de entrega en función de la fecha de envío
+            function updateFechaEstimada() {
+                var fechaEnvio = new Date(fechaEnvioInput.value);
+                var fechaEstimada = new Date(fechaEnvio);
+                fechaEstimada.setDate(fechaEstimada.getDate() + 7); // Fecha estimada es una semana después
+                document.getElementById('fecha_entrega_estimada').value = fechaEstimada.toISOString().split('T')[0];
+            }
+
+            fechaEnvioInput.addEventListener('change', updateFechaEstimada);
+            updateFechaEstimada(); // Inicializa la fecha estimada de entrega al cargar la página
+
+            // Actualiza la fecha real de entrega basada en el estado
+            function updateFechaReal() {
+                var estado = document.getElementById('estado').value;
+                var fechaRealInput = document.getElementById('fecha_entrega_real');
+                if (estado === 'Recibido' || estado === 'Completado') {
+                    fechaRealInput.value = today;
+                    fechaRealInput.setAttribute('readonly', true); // Hace que el campo sea de solo lectura
+                } else {
+                    fechaRealInput.value = '';
+                    fechaRealInput.removeAttribute('readonly'); // Permite la edición si el estado no es 'Recibido' o 'Completado'
+                }
+            }
+
+            document.getElementById('estado').addEventListener('change', updateFechaReal);
+            updateFechaReal(); // Inicializa la fecha real de entrega al cargar la página
+
+            // Valida el formulario antes de enviarlo
+            document.querySelector('form').addEventListener('submit', function(event) {
+                var fechaEnvio = new Date(fechaEnvioInput.value);
+                var fechaEstimada = new Date(document.getElementById('fecha_entrega_estimada').value);
+                var fechaReal = document.getElementById('fecha_entrega_real').value;
+                var fechaRealDate = fechaReal ? new Date(fechaReal) : null;
+                var errorMessage = "";
+
+                if (fechaRealDate && fechaRealDate < fechaEnvio) {
+                    errorMessage = "La Fecha Real de Entrega no puede ser anterior a la Fecha de Envío.";
+                } else if (fechaEstimada < fechaEnvio) {
+                    errorMessage = "La Fecha Estimada de Entrega no puede ser anterior a la Fecha de Envío.";
+                }
+
+                if (errorMessage) {
+                    alert(errorMessage);
+                    event.preventDefault(); // Evita el envío del formulario
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="container">

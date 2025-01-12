@@ -5,10 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Agregar Producto al inventario</title>
+    <script>
+        function validarFormulario() {
+            const cantidadEnStock = parseInt(document.getElementById('cantidad_en_stock').value);
+            const stockMinimo = parseInt(document.getElementById('stock_minimo').value);
+            const stockMaximo = parseInt(document.getElementById('stock_maximo').value);
+
+            // Validar que los campos sean numéricos
+            if (isNaN(cantidadEnStock) || isNaN(stockMinimo) || isNaN(stockMaximo)) {
+                alert('Todos los campos deben contener valores numéricos.');
+                return false;
+            }
+
+            // Validar valores de stock
+            if (stockMinimo < 0) {
+                alert('El stock mínimo no puede ser menor a 0.');
+                return false;
+            }
+
+            if (stockMaximo > 1000) {
+                alert('El stock máximo no puede ser mayor a 1000.');
+                return false;
+            }
+
+            if (cantidadEnStock < stockMinimo || cantidadEnStock > stockMaximo) {
+                alert('La cantidad en stock debe estar entre el stock mínimo y máximo.');
+                return false;
+            }
+
+            return true;
+        }
+    </script>
 </head>
 <body>
     <h2>Agregar Producto al inventario</h2>
-    <form method="post" action="{{ url_for('submit') }}">
+    <form method="post" action="{{ url_for('submit') }}" onsubmit="return validarFormulario()">
         
         <label for="nombre">Nombre del Producto:</label>
         <select id="nombre" name="nombre" required>
@@ -28,10 +59,10 @@
         <input type="text" id="cantidad_en_stock" name="cantidad_en_stock" required>
 
         <label for="stock_minimo">Stock Minimo:</label>
-        <input type="text" id="stock_minimo" name="stock_minimo" required>
+        <input type="text" id="stock_minimo" name="stock_minimo" value="0" required>
 
         <label for="stock_maximo">Stock Maximo:</label>
-        <input type="text" id="stock_maximo" name="stock_maximo" required>
+        <input type="text" id="stock_maximo" name="stock_maximo" value="1000" required>
     
         <button type="submit">Agregar inventario</button>
     </form>

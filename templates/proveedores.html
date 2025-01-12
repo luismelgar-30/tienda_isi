@@ -7,11 +7,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Lista de proveedores</h1>
+    <div class="container2">
+        <h1 style="text-align: center;">Lista de proveedores</h1>
+
+    <br>
 
     <!-- Formulario de búsqueda -->
     <form method="GET" action="{{ url_for('proveedores') }}" id="searchForm">
         <div class="search-container">
+            {% if session.get('permiso_buscador_6') == 1 %}
             <label for="search_criteria" class="search-label">Buscar por:</label>
             <select name="search_criteria" id="search_criteria" class="search-criteria">
                 <option value="id_proveedor" {% if search_criteria == 'id_proveedor' %}selected{% endif %}>ID</option>
@@ -27,7 +31,9 @@
             <input type="text" name="search_query" value="{{ search_query if search_query is not none else '' }}" placeholder="Buscar..." class="search-query">
         </div>
         <div class="per-page-group">
+            
             <label for="per_page">Mostrar:</label>
+            <br>
             <select name="per_page" id="per_page">
                 <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
                 <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
@@ -35,12 +41,22 @@
             </select>
             <input type="hidden" name="page" id="currentPage" value="{{ page }}">
         </div>
+        <br>
         <button type="submit" class="search-button" style="width: 213px;">Buscar</button>
+        {% endif %}
+        <br>
     </form>
-
+    {% if session.get('permiso_crear_6') == 1 %}
     <a class="button-link ing" href="{{ url_for('index_proveedores') }}">Ingresar Datos de Proveedor</a>
-    <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
-
+    {% endif %}
+    <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+    {% if session.get('permiso_exportar_excel_6') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_excel_proveedores') }}">Descargar Lista en Excel</a>
+    {% endif %}
+    {% if session.get('permiso_exportar_pdf_6') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+    {% endif %}
+    
     <table>
         <tr>
             <th>ID del proveedor</th>
@@ -65,7 +81,7 @@
             <td>{{ proveedor[6] }}</td>
             <td>{{ proveedor[7] }}</td>
             <td>
-                {% if proveedor[7] == 'Numero de Identidad' %}
+                {% if proveedor[7] == 'DNI' %}
                     {{ proveedor[8][:4] }}-{{ proveedor[8][4:8] }}-{{ proveedor[8][8:] }}
                 {% elif proveedor[7] == 'RTN' %}
                     {{ proveedor[8] }}
@@ -74,8 +90,12 @@
                 {% endif %}
             </td>
             <td>
+                {% if session.get('permiso_editar_6') == 1 %}
                 <a class="button-link baa" href="#" onclick="openEditWindow('{{ url_for('edit_proveedores', id_proveedor=proveedor[0]) }}')">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                {% endif %}
+                {% if session.get('permiso_eliminar_6') == 1 %}
                 <a class="button-link bee" href="{{ url_for('eliminar_proveedores', id_proveedor=proveedor[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
@@ -110,6 +130,7 @@
         {% if page < total_pages %}
         <a href="{{ url_for('proveedores', page=page+1, per_page=per_page, search_criteria=search_criteria, search_query=search_query) }}">Siguiente</a>
         {% endif %}
+    </div>
     </div>
 </body>
 </html>

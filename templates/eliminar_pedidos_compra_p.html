@@ -5,31 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Eliminar Pedido</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 10px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            color: #555;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #c9302c;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+            padding: 10px;
+            background-color: #5bc0de;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        a:hover {
+            background-color: #31b0d5;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h2>Eliminar Pedido</h2>
         {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-          {% endif %}
+            {% if messages %}
+                <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
         {% endwith %}
         <form action="{{ url_for('eliminar_pedido', id_pedido=pedido[0]) }}" method="post">
             <label for="id_proveedor">Proveedor:</label>
             <input type="text" id="id_proveedor" name="id_proveedor" value="{{ pedido[1] }}" readonly><br><br>
+
+            <label for="numero_factura">Numero de Factura:</label>
+            <input type="text" id="numero_factura" name="numero_factura" value="{{ pedido[2] }}" readonly><br><br>
+
             <label for="fecha_pedido">Fecha Pedido:</label>
-            <input type="date" id="fecha_pedido" name="fecha_pedido" value="{{ pedido[2] }}" readonly><br><br>
-            <label for="fecha_entrega">Fecha Entrega:</label>
-            <input type="date" id="fecha_entrega" name="fecha_entrega" value="{{ pedido[3] }}" readonly><br><br>
+            <input type="date" id="fecha_pedido" name="fecha_pedido" value="{{ pedido[3] }}" readonly><br><br>
+
+            <label for="fecha_entrega">Fecha Entrega Estimada:</label>
+            <input type="date" id="fecha_entrega_estimada" name="fecha_entrega_estimada" value="{{ pedido[4] }}" readonly><br><br>
+
+            <label for="fecha_entrega">Fecha Recepcion</label>
+            <input type="date" id="fecha_entrega" name="fecha_entrega" value="{{ pedido[5] }}" readonly><br><br>
+
             <label for="id_metodo">Método de Pago:</label>
-            <input type="text" id="id_metodo" name="id_metodo" value="{{ pedido[4] }}" readonly><br><br>
+            <input type="text" id="id_metodo" name="id_metodo" value="{{ pedido[6] }}" readonly><br><br>
+
             <label for="id_estado">Estado:</label>
-            <input type="text" id="id_estado" name="id_estado" value="{{ pedido[5] }}" readonly><br><br>
-            <button type="submit" onclick="return confirm('¿Estás seguro de eliminar este pedido? {{ pedido[1] }}');">Eliminar</button>
+            <input type="text" id="id_estado" name="id_estado" value="{{ pedido[7] }}" readonly><br><br>
+
+            <button type="submit" onclick="return confirm('¿Estás seguro de eliminar este pedido? Proveedor: {{ pedido[1] }}');">Eliminar</button>
         </form>
         <br>
         <a href="{{ url_for('pedidos_compra_pv') }}">Lista de Pedidos</a>

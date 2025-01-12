@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Eliminar roles</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Eliminar roles</h1>
+        <p>¿Estás seguro de que quieres eliminar la roles con el siguiente ID?</p>
+        <ul>
+            <li><strong>ID:</strong> {{ roles[0] }}</li>
+            <li><strong>Nombre de la roles:</strong> {{ roles[1] }}</li>
+        </ul>
+        <form method="POST" action="{{ url_for('eliminar_roles', id_rol=roles[0]) }}">
+            <button type="submit">Eliminar</button>
+        </form>
+        <a href="{{ url_for('roles') }}">Cancelar</a>
+    </div>
+</body>
+</html>

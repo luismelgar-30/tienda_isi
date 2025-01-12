@@ -11,6 +11,10 @@
     <div class="container">
     <h2>Lista de impuesto</h2>
     <form method="get" action="{{ url_for('impuesto') }}">
+
+        <!-- Recuerda cambiar el numero del permiso dependiendo del id en la tabla n_pantalla -->
+
+        {% if session.get('permiso_buscador_21') == 1 %} <!-- Usar Permiso ver para bloquear el Buscador -->
         <input type="text" name="search_query" placeholder="Buscar impuesto..." value="{{ search_query }}">
         <select name="search_criteria">
             <option value="id_impuesto" {% if search_criteria == 'id_impuesto' %}selected{% endif %}>ID Impuesto</option>
@@ -18,7 +22,18 @@
             <option value="tasa_impuesto" {% if search_criteria == 'tasa_impuesto' %}selected{% endif %}>Tasa Impuesto</option>
         </select>
         <button type="submit">Buscar</button>
+
+        
     </form>
+    {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
     
 
     <br>
@@ -32,12 +47,22 @@
 
         <input type="hidden" name="search_query" value="{{ search_query }}">
         <input type="hidden" name="search_criteria" value="{{ search_criteria }}">
+        {% endif %}
     </form>
 
     <br>
+    {% if session.get('permiso_crear_21') == 1 %} <!-- Usar Permiso Crear para bloquear el Insertar -->
     <a class="button-link ing" href="{{ url_for('index_impuesto') }}">Agregar nuevo impuesto</a>
+    {% endif %}
     <a class="button-link ing"  href="{{ url_for('historico_impuestos') }}">Historico de Impuestos</a>
-    <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
+    <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+    {% if session.get('permiso_exportar_excel_21') == 1 %} 
+    <a class="button-link ing" href="{{ url_for('descargar_excel') }}">Descargar Lista en Excel</a>
+    {% endif %}
+    {% if session.get('permiso_exportar_pdf_21') == 1 %} 
+    <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+    {% endif %}
+    
     <table>
         <thead>
             <tr>
@@ -52,10 +77,16 @@
             <tr>
                 <td>{{ impuesto[0] }}</td>
                 <td>{{ impuesto[1] }}</td>
-                <td>{{ impuesto[2] }}</td>
+                <td>{{ impuesto[2] }}%</td>
                 <td>
+                    {% if session.get('permiso_editar_21') == 1 %} <!-- Usar Permiso Editar para bloquear el Editar -->
                     <a class="button-link baa" href="#" onclick="openEditWindow('{{ url_for('edit_impuesto', id_impuesto=impuesto[0]) }}')">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                    {% else %}
+                    {% endif %}
+                    {% if session.get('permiso_eliminar_21') == 1 %} <!-- Usar Permiso Eliminar para bloquear el Eliminar -->
                     <a class="button-link bee" href="{{ url_for('eliminar_impuesto', id_impuesto=impuesto[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                    {% else %}
+                    {% endif %}
                 </td>
             </tr>
             {% else %}

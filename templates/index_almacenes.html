@@ -9,9 +9,10 @@
             const nameInput = document.getElementById('nombre');
             const nameValue = nameInput.value;
 
-            const regex = /^(?!.*([a-zA-Z])\1{2})[a-zA-Z]{3,10}$/;
+            // Modifica la regex para permitir un solo espacio
+            const regex = /^(?!.*([a-zA-Z])\1{2})[a-zA-Z]+(?: [a-zA-Z]+)?$/;
             if (!regex.test(nameValue)) {
-                alert('El nombre debe tener entre 3 y 10 caracteres, sin números ni signos, sin la misma letra repetida tres veces seguidas.');
+                alert('El nombre debe tener entre 3 y 10 caracteres, sin números ni signos, sin la misma letra repetida tres veces seguidas. Se permite un solo espacio.');
                 return false;
             }
             return true;
@@ -23,16 +24,25 @@
         <h1>Gestión de Almacenes</h1>
         <form action="{{ url_for('submit') }}" method="POST" onsubmit="return validateName()">
             <label for="nombre">Nombre:</label>
-            <input type="text" id="nombre" name="nombre" required pattern="(?!.*([a-zA-Z])\1{2})[a-zA-Z]{3,10}">
+            <input type="text" id="nombre" name="nombre" required pattern="^(?!.*([a-zA-Z])\1{2})[a-zA-Z]+(?: [a-zA-Z]+)?$">
             
             <label for="direccion">Dirección:</label>
             <select id="direccion" name="direccion" required>
+                <option value="" disabled selected>Selecciona una dirección</option>
                 <option value="Tegucigalpa">Tegucigalpa</option>
                 <option value="Cortes">Cortes</option>
                 <option value="Colon">Colón</option>
                 <option value="Olancho">Olancho</option>
             </select>
             
+            <label for="sucursal">Sucursal:</label>
+            <select id="sucursal" name="sucursal" required>
+                <option value="" disabled selected>Selecciona una sucursal</option>
+                {% for sucursal in sucursales %}
+                    <option value="{{ sucursal[0] }}">{{ sucursal[1] }}</option>
+                {% endfor %}
+            </select>
+            <br>
             <button type="submit">Agregar Almacén</button>
         </form>
         <a href="{{ url_for('almacenes') }}">Ver Almacenes</a>

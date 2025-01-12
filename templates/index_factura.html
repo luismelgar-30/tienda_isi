@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Facturas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productoSelect = document.getElementById('id_producto');
+            const precioUnitarioInput = document.getElementById('precio_unitario');
+            
+            productoSelect.addEventListener('change', function() {
+                const selectedOption = productoSelect.options[productoSelect.selectedIndex];
+                const precioUnitario = selectedOption.getAttribute('data-precio-unitario');
+                precioUnitarioInput.value = precioUnitario || '';
+                actualizarSubtotalYTotal();
+            });
+
+            function actualizarSubtotalYTotal() {
+                const cantidad = document.getElementById('cantidad').value;
+                const precioUnitario = document.getElementById('precio_unitario').value;
+                const subtotal = document.getElementById('subtotal');
+                const total = document.getElementById('total');
+                const idImpuesto = document.getElementById('id_impuesto');
+
+                if (cantidad && precioUnitario) {
+                    subtotal.value = (cantidad * precioUnitario).toFixed(2);
+                } else {
+                    subtotal.value = '';
+                }
+
+                if (subtotal.value && idImpuesto.selectedIndex >= 0) {
+                    const tasaImpuesto = idImpuesto.options[idImpuesto.selectedIndex].text.replace('%', '');
+                    total.value = (subtotal.value * (1 + (tasaImpuesto / 100))).toFixed(2);
+                } else {
+                    total.value = '';
+                }
+            }
+
+            document.getElementById('cantidad').addEventListener('input', actualizarSubtotalYTotal);
+            document.getElementById('id_impuesto').addEventListener('change', actualizarSubtotalYTotal);
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+    <header>
+        <h1>Gestión de Facturas</h1>
+    </header>
+    <main>
+        <form action="{{ url_for('submit_factura') }}" method="POST">
+            <label for="id_sar">CAI:</label>
+            <select id="id_sar" name="id_sar">
+                {% for sar in sar %}
+                <option value="{{ sar[0] }}">{{ sar[1] }}</option>
+                {% endfor %}
+            </select>
+            
+            <label for="nombre">Nombre del Empleado:</label>
+            <select id="nombre" name="nombre">
+                {% for empleado in empleados %}
+                <option value="{{ empleado[0] }}">{{ empleado[1] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="documento">Documento del Cliente:</label>
+            <select id="documento" name="documento">
+                {% for cliente in clientes %}
+                <option value="{{ cliente[0] }}">{{ cliente[0] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="id_pedido">ID Pedido:</label>
+            <select id="id_pedido" name="id_pedido">
+                {% for pedido in pedidos %}
+                <option value="{{ pedido[0] }}">{{ pedido[0] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="id_producto">Producto:</label>
+            <select id="id_producto" name="id_producto">
+                {% for producto in productos %}
+                <option value="{{ producto[0] }}" data-precio-unitario="{{ producto[2] }}">{{ producto[1] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="cantidad">Cantidad:</label>
+            <input type="number" id="cantidad" name="cantidad" required>
+
+            <label for="precio_unitario">Precio Unitario:</label>
+            <input type="number" id="precio_unitario" name="precio_unitario" step="0.01" required>
+
+            <label for="subtotal">Subtotal:</label>
+            <input type="number" id="subtotal" name="subtotal" step="0.01" readonly>
+
+            <label for="id_impuesto">Impuesto:</label>
+            <select id="id_impuesto" name="id_impuesto">
+                {% for impuesto in impuestos %}
+                <option value="{{ impuesto[0] }}">{{ impuesto[1] }}%</option>
+                {% endfor %}
+            </select>
+
+            <label for="total">Total:</label>
+            <input type="number" id="total" name="total" step="0.01" readonly>
+
+            <button type="submit">Guardar Factura</button>
+            <br>
+            <a href="{{ url_for('facturas') }}">Ver Facturas</a>
+        </form>
+    </main>
+</div>
+</body>
+</html>

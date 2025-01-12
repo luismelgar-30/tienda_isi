@@ -5,10 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Inventario</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function validarFormulario() {
+            const cantidadEnStock = parseInt(document.getElementById('cantidad_en_stock').value);
+            const stockMinimo = parseInt(document.getElementById('stock_minimo').value);
+            const stockMaximo = parseInt(document.getElementById('stock_maximo').value);
+
+            // Validar que los campos sean numéricos
+            if (isNaN(cantidadEnStock) || isNaN(stockMinimo) || isNaN(stockMaximo)) {
+                alert('Todos los campos deben contener valores numéricos.');
+                return false;
+            }
+
+            // Validar que la cantidad en stock esté entre el stock mínimo y máximo
+            if (cantidadEnStock < stockMinimo || cantidadEnStock > stockMaximo) {
+                alert('La cantidad en stock debe estar entre el stock mínimo y máximo.');
+                return false;
+            }
+
+            return true;
+        }
+    </script>
 </head>
 <body>
     <h1>Editar Inventario</h1>
-    <form method="POST">
+    <form method="POST" onsubmit="return validarFormulario()">
         <label for="id_producto">Producto:</label>
         <select name="id_producto" id="id_producto" required>
             {% for producto in productos %}

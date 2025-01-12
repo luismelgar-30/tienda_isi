@@ -4,35 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Ingresar Descuento
-    </title>
+    <title>Ingresar Descuento</title>
     <script>
         function validateForm() {
-            const nombre = document.getElementById('nombre').value;
-            const descripcion = document.getElementById('descripcion').value;
-            const valor = document.getElementById('valor').value;
+            const nombre = document.getElementById('nombre').value.trim();
+            const valor = document.getElementById('valor').value.trim();
 
-            // Validaciones generales
-            const hasRepeatedChars = (str) => /(.)\1\1/.test(str);
-            const hasSigns = (str) => /[^a-zA-Z0-9\s]/.test(str);
-            const hasNumbers = (str) => /\d/.test(str);
-            const hasLetters = (str) => /[a-zA-Z]/.test(str);
+ 
 
-            if (!nombre || !descripcion || !valor) {
-                alert('Todos los campos son obligatorios');
-                return false;
-            }
-    
-            if (hasRepeatedChars(nombre) || hasRepeatedChars(descripcion)) {
-                alert('No se permiten tres letras repetidas consecutivas');
-                return false;
-            }
-            if (hasSigns(nombre) || hasSigns(descripcion)) {
-                alert('No se permiten signos');
-                return false;
-            }
-            if (hasNumbers(nombre) || hasNumbers(descripcion) || (!/^\d+(\.\d+)?$/.test(valor))) {
-                alert('No se permiten números en campos de texto y viceversa');
+            // Validaciones para el campo valor
+            const valorPattern = /^(0\.\d+|0\.[0-9][0-9]?)$/; // Acepta valores como "0.05" hasta "0.90"
+            if (!valorPattern.test(valor) || parseFloat(valor) > 0.90) {
+                alert('El valor debe ser un número entre 0.05 y 0.90.');
                 return false;
             }
 
@@ -61,7 +44,7 @@
         </form>
         
         <br>
-        <a href="{{ url_for('promocion') }}">Lista de Descuentos<</a>
+        <a href="{{ url_for('promocion') }}">Lista de Descuentos</a>
     </div>
 </body>
 </html>

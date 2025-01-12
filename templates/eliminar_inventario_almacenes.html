@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Eliminar Inventario</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Eliminar Inventario</h2>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        <form action="{{ url_for('eliminar_inventario', id_inventario=inventario[0]) }}" method="post">
+          <label for="id_inventario">ID Inventario:</label>
+          <input type="text" id="id_inventario" name="id_inventario" value="{{ inventario[0] }}" readonly><br><br>
+          
+          <label for="id_almacen">ID Almacén:</label>
+          <input type="text" id="id_almacen" name="id_almacen" value="{{ inventario[1] }}" readonly><br><br>
+
+          <label for="id_producto">ID Producto:</label>
+          <input type="text" id="id_producto" name="id_producto" value="{{ inventario[2] }}" readonly><br><br>
+          
+          <label for="cantidad_en_stock">Cantidad en Stock:</label>
+          <input type="text" id="cantidad_en_stock" name="cantidad_en_stock" value="{{ inventario[3] }}" readonly><br><br>
+          
+          <label for="stock_minimo">Stock Mínimo:</label>
+          <input type="text" id="stock_minimo" name="stock_minimo" value="{{ inventario[4] }}" readonly><br><br>
+          
+          <label for="stock_maximo">Stock Máximo:</label>
+          <input type="text" id="stock_maximo" name="stock_maximo" value="{{ inventario[5] }}" readonly><br><br>
+          
+          <button type="submit" onclick="return confirm('¿Está seguro de eliminar este inventario? ID: {{ inventario[0] }}');">Eliminar</button>
+        </form>
+        
+        <br>
+        <a href="{{ url_for('inventario_almacen') }}">Lista de Inventarios</a>
+    </div>
+</body>
+</html>

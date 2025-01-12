@@ -5,6 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <title>Editar Producto</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                // Realizar la solicitud de envío del formulario usando AJAX
+                const form = event.target;
+                const formData = new FormData(form);
+                const request = new XMLHttpRequest();
+                request.open('POST', form.action, true);
+    
+                request.onload = function() {
+                    if (request.status === 200) {
+                        // Si la actualización fue exitosa, cierra la ventana
+                        window.close();
+                    } else {
+                        alert('Error al actualizar el producto');
+                    }
+                };
+                
+                request.send(formData);
+            });
+        });
+        // Validar nombre del producto
+        function validateProductName(name) {
+            const namePattern = /^[a-zA-Z]+( [a-zA-Z]+)*$/; // Solo letras y espacios
+            const minLength = 3;
+            const maxLength = 20;
+
+            // Verificar longitud
+            if (name.length < minLength || name.length > maxLength) {
+                return 'El nombre del producto debe tener entre 3 y 20 caracteres.';
+            }
+
+            // Verificar caracteres especiales
+            if (!namePattern.test(name)) {
+                return 'El nombre del producto solo puede contener letras y espacios.';
+            }
+
+            // Verificar tres letras seguidas repetidas
+            const repeatedPattern = /(.)\1\1/;
+            if (repeatedPattern.test(name)) {
+                return 'El nombre del producto no puede contener tres letras seguidas repetidas.';
+            }
+
+            return null;
+        }
+
+        // Validar precio original
+        function validatePrice(price) {
+            const pricePattern = /^[0-9]+$/;
+
+            // Verificar si es un número positivo
+            if (!pricePattern.test(price) || parseFloat(price) <= 0) {
+                return 'El precio original debe ser un número positivo.';
+            }
+
+            return null;
+        }
+
+        function validateForm(event) {
+            const form = event.target;
+            const name = form['nombre'].value.trim();
+            const price = form['original_precio'].value.trim();
+            let errors = [];
+
+            // Validar nombre del producto
+            const nameError = validateProductName(name);
+            if (nameError) {
+                errors.push(nameError);
+            }
+
+            // Validar precio original
+            const priceError = validatePrice(price);
+            if (priceError) {
+                errors.push(priceError);
+            }
+
+            // Mostrar alertas si hay errores
+            if (errors.length > 0) {
+                event.preventDefault(); // Evitar el envío del formulario
+                alert(errors.join('\n')); // Mostrar todos los errores en una alerta
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('form').addEventListener('submit', validateForm);
+        });
+    </script>
 </head>
 <body>
     <div class="container">
@@ -24,47 +113,47 @@
           <input type="text" id="nombre" name="nombre" value="{{ producto[1] }}" required>
       
           <label for="id_categoria">Categoría:</label>
-<select name="id_categoria" id="id_categoria" required>
-    {% for categoria in categorias %}
-        <option value="{{ categoria[0] }}" {% if categoria[0] == producto[2] %}selected{% endif %}>{{ categoria[1] }}</option>
-    {% endfor %}
-</select>
+          <select name="id_categoria" id="id_categoria" required>
+              {% for categoria in categorias %}
+                  <option value="{{ categoria[0] }}" {% if categoria[0] == producto[2] %}selected{% endif %}>{{ categoria[1] }}</option>
+              {% endfor %}
+          </select>
 
-<label for="id_proveedor">Nombre Proveedor:</label>
-<select id="id_proveedor" name="id_proveedor" required>
-    {% for proveedor in proveedores %}
-    <option value="{{ proveedor[0] }}" {% if proveedor[0] == producto[3] %}selected{% endif %}>{{ proveedor[1] }}</option>
-    {% endfor %}
-</select>
+          <label for="id_proveedor">Nombre Proveedor:</label>
+          <select id="id_proveedor" name="id_proveedor" required>
+              {% for proveedor in proveedores %}
+              <option value="{{ proveedor[0] }}" {% if proveedor[0] == producto[3] %}selected{% endif %}>{{ proveedor[1] }}</option>
+              {% endfor %}
+          </select>
 
-<label for="original_precio">Precio Original:</label>
-<input type="text" id="original_precio" name="original_precio" value="{{ producto[4] }}" required>
+          <label for="original_precio">Precio Original:</label>
+          <input type="text" id="original_precio" name="original_precio" value="{{ producto[4] }}" required>
 
-<label for="id_impuesto">Tasa Impuesto:</label>
-<select id="id_impuesto" name="id_impuesto" required>
-    {% for imp in impuesto %}
-    <option value="{{ imp[0] }}" {% if imp[0] == producto[5] %}selected{% endif %}>{{ imp[1] }}</option>
-    {% endfor %}
-</select>
+          <label for="id_impuesto">Tasa Impuesto:</label>
+          <select id="id_impuesto" name="id_impuesto" required>
+              {% for imp in impuesto %}
+              <option value="{{ imp[0] }}" {% if imp[0] == producto[5] %}selected{% endif %}>{{ imp[1] }}</option>
+              {% endfor %}
+          </select>
 
-<label for="id_promocion">Descuento:</label>
-<select id="id_promocion" name="id_promocion" required>
-    {% for prom in promocion %}
-    <option value="{{ prom[0] }}" {% if prom[0] == producto[6] %}selected{% endif %}>{{ prom[1] }}</option>
-    {% endfor %}
-</select>
+          <label for="id_promocion">Descuento:</label>
+          <select id="id_promocion" name="id_promocion" required>
+              {% for prom in promocion %}
+              <option value="{{ prom[0] }}" {% if prom[0] == producto[6] %}selected{% endif %}>{{ prom[1] }}</option>
+              {% endfor %}
+          </select>
 
-<label for="id_garantia">Duración Garantía:</label>
-<select id="id_garantia" name="id_garantia" required>
-    {% for gar in garantia %}
-    <option value="{{ gar[0] }}" {% if gar[0] == producto[7] %}selected{% endif %}>{{ gar[1] }}</option>
-    {% endfor %}
-</select>
+          <label for="id_garantia">Duración Garantía:</label>
+          <select id="id_garantia" name="id_garantia" required>
+              {% for gar in garantia %}
+              <option value="{{ gar[0] }}" {% if gar[0] == producto[7] %}selected{% endif %}>{{ gar[1] }}</option>
+              {% endfor %}
+          </select>
 
-        
-            <input type="submit" value="Update Producto">
+          <input type="submit" value="Actualizar Producto">
         </form>
         
-    <a href="{{ url_for('producto') }}">Volver</a>
+        <a href="{{ url_for('producto') }}">Volver</a>
+    </div>
 </body>
 </html>

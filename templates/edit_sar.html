@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar SAR</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Editar SAR</h1>
+        <form action="{{ url_for('edit_sar', id_sar=sar[0]) }}" method="POST">
+            <label for="rtn">RTN:</label>
+            <input type="text" id="rtn" name="rtn" value="{{ sar[1] }}" required>
+            
+            <label for="cai">CAI:</label>
+            <input type="text" id="cai" name="cai" value="{{ sar[2] }}" required>
+            
+            <label for="fecha_emision">Fecha de Emisión:</label>
+            <input type="date" id="fecha_emision" name="fecha_emision" value="{{ sar[3] }}" readonly>
+            
+            <label for="fecha_vencimiento">Fecha de Vencimiento:</label>
+            <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" value="{{ sar[4] }}" readonly>
+            
+            <label for="rango_inicial">Rango Inicial:</label>
+            <input type="text" id="rango_inicial" name="rango_inicial" value="{{ sar[5] }}" required pattern="\d{8}" title="Debe ingresar exactamente 8 números">
+            
+            <label for="rango_final">Rango Final:</label>
+            <input type="text" id="rango_final" name="rango_final" value="{{ sar[6] }}" required pattern="\d{8}" title="Debe ingresar exactamente 8 números">
+            
+            <label for="id_sucursal">Sucursal:</label>
+            <select id="id_sucursal" name="id_sucursal" required>
+                {% for id_sucursal, ciudad in sucursales %}
+                <option value="{{ id_sucursal }}" {% if id_sucursal == sar[7] %}selected{% endif %}>{{ ciudad }}</option>
+                {% endfor %}
+            </select>
+            
+            <label for="secuencial">Secuencial:</label>
+            <input type="text" id="secuencial" name="secuencial" value="{{ sar[8] }}" required>
+            
+            <label for="estado">Estado:</label>
+            <select id="estado" name="estado" required>
+                <option value="Activo" {% if sar[9] == "Activo" %}selected{% endif %}>Activo</option>
+                <option value="Inactivo" {% if sar[9] == "Inactivo" %}selected{% endif %}>Inactivo</option>
+            </select>
+            
+            <button type="submit">Actualizar SAR</button>
+        </form>
+        <a href="{{ url_for('sars') }}">Cancelar</a>
+    </div>
+</body>
+</html>

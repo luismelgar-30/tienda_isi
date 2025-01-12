@@ -11,26 +11,38 @@
     <h1 style="text-align: center;">Detalles de compra proveedor</h1>
     <br>
         <div>
-        <a style="padding: 10px 15px; font-size: 16px;  width: auto; max-width: 150px;" class="button-link ing" href="{{ url_for('index_detalle_p') }}">Ingresar Detalle</a>
+           
+            <a style="padding: 10px 15px; font-size: 16px;  width: auto; max-width: 150px;" class="button-link ing" href="{{ url_for('index_detalle_p') }}">Ingresar Detalle</a>             
+          
+            <a href="http://127.0.0.1:5015/pedidos_compra_pv"><button type="button">Ir a Pedido</button></a>
+            <a class="button-link ing2"  href="http://127.0.0.1:5030/index_principal">INICIO</a>
         </div>
-        <br>
-            <a href="http://127.0.0.1:5015/pedidos_compra_pv">
-                <button type="button">Ir a Pedido</button>
-            </a>
             <br>
+            <form method="GET" action="{{ url_for('detalles_p') }}">
+                <select name="filter_by">
+                    <option value="Id_pedido" {% if filter_by == 'Id_pedido' %}selected{% endif %}>Numero Pedido</option>
+                    <option value="id_detalle" {% if filter_by == 'id_detalle' %}selected{% endif %}>Detalle</option>
+                    <option value="Cantidad" {% if filter_by == 'cantidad' %}selected{% endif %}>Cantidad</option>
+                    <option value="precio_unitario" {% if filter_by == 'precio_unitario' %}selected{% endif %}>Precio Unitario</option>
+                </select>
+                <input type="text" name="filter_value" value="{{ filter_value }}" placeholder="Buscar...">
+                <button type="submit">Buscar</button>
+            </form>
+            
+            
+            
             <br>
-            <a class="button-link ing2"  href="http://127.0.0.1:5501/index.html">INICIO</a>
-            <br>
-            <br>
-            <div>
-            <input style="padding: 10px 15px; font-size: 16px;  width: auto; max-width: 200px;" type="text" name="search" value="{{ search_query }}" placeholder="Buscar...">
-            <button style="padding: 10px 15px; font-size: 16px;  width: auto; max-width: 100px;" type="submit">Buscar</button>
-            </div>
-            <select style="padding: 5px 7px; font-size: 10px; width: auto; max-width: 50px; display: block; margin: 0 auto;" >
-                <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
-                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
-                <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
-            </select>
+           
+            <form method="get" action="{{ url_for('detalles_p') }}">
+                <label for="per_page">Elementos por página:</label>
+                <select name="per_page" id="per_page" onchange="this.form.submit()">
+                    <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+                    <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                    <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                </select>
+                <input type="hidden" name="search_query" value="{{ search_query }}">
+                <input type="hidden" name="search_criteria" value="{{ search_criteria }}">
+            </form>
     <table>
         <thead>
             <tr>
@@ -47,21 +59,41 @@
         </thead>
         <tbody>
             {% for detalle in detalles_p %}
-                <tr>
-                    <td>{{ detalle[0] }}</td>
-                    <td>{{ detalle[1] }}</td>
-                    <td>{{ detalle[2] }}</td>
-                    <td>{{ detalle[3] }}</td>
-                    <td>{{ detalle[4] }}</td>
-                    <td>{{ detalle[5] }}</td>
-                    <td>{{ detalle[6] }}</td>
-                    <td>{{ detalle[7] }}</td>
-                    <td>
-                        <a class="button-link baa" href="{{ url_for('edit_detalle_p', id_detalle=detalle[0]) }}">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
-                        <a class="button-link bee" href="{{ url_for('eliminar_detalle_p', id_detalle=detalle[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
-                    </td>
-                </tr>
-            {% endfor %}
+            <tr>
+                <td>{{ detalle[0] }}</td>
+                <td>{{ detalle[1] }}</td>
+                <td>{{ detalle[2] }}</td>
+                <td>{{ detalle[3] }}</td>
+                <td>{{ detalle[4] }}</td>
+                <td>{{ detalle[5] }}</td>
+                <td>{{ detalle[6] }}</td>
+                <td>{{ detalle[7] }}</td>
+                <td>
+                    
+                    <a class="button-link baa" 
+                       href="{{ url_for('edit_detalle_p', id_detalle=detalle[0]) }}"
+                       {% if estados[detalle[1]] == 2 %}style="pointer-events: none; color: gray;" title="No puedes editar un pedido recibido"{% endif %}>
+                        Editar <i class='bx bx-edit' style='color:#000000'></i>
+                    </a>
+                    
+                </td>
+                <td>
+                    
+                    <form action="{{ url_for('eliminar_detalle_p', id_detalle=detalle[0]) }}" method="post" 
+                          {% if estados[detalle[1]] == 2 %}style="display: none;"{% endif %}>
+                        <a class="button-link bee" 
+                           href="#" 
+                           onclick="this.closest('form').submit();" 
+                           {% if estados[detalle[1]] == 2 %}style="pointer-events: none; color: gray;" title="No puedes eliminar un pedido recibido"{% endif %}>
+                            Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i>
+                        </a>
+                    </form>
+                
+                </td>
+            </tr>
+        {% endfor %}
+        
+        
         </tbody>
     </table>
     <div>

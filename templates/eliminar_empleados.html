@@ -4,46 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Eliminar empleado</title>
+    <title>Eliminar Empleados</title>
 </head>
 <body>
     <div class="container">
-        <h2>Eliminar empleado</h2>
+        <h2>Eliminar Empleados</h2>
+        
         {% with messages = get_flashed_messages() %}
           {% if messages %}
-            <ul>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
+            <div class="flash-messages">
+              <ul>
+              {% for message in messages %}
+                <li>{{ message }}</li>
+              {% endfor %}
+              </ul>
+            </div>
           {% endif %}
         {% endwith %}
 
-        <form action="{{ url_for('eliminar_empleados', id_empleado=empleado[0]) }}" method="post">
+        <form action="{{ url_for('eliminar_empleados', id_empleado=empleados[0]) }}" method="post">
           <label for="nombre">Nombre:</label>
-          <input type="text" id="nombre" name="nombre" value="{{ empleado[1] }}" readonly><br><br>
+          <input type="text" id="nombre" name="nombre" value="{{ empleados[1] }}" readonly><br><br>
           <label for="apellido">Apellido:</label>
-          <input type="text" id="apellido" name="apellido" value="{{ empleado[2] }}" readonly><br><br>
+          <input type="text" id="apellido" name="apellido" value="{{ empleados[2] }}" readonly><br><br>
           <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
-          <input type="text" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ empleado[3] }}" readonly><br><br>
-          <label for="puesto">Puesto de Trabajo:</label>
-          <input type="text" id="puesto_de_trabajo" name="puesto_de_trabajo" value="{{ empleado[4] }}" readonly><br><br>
+          <input type="text" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ empleados[3] }}" readonly><br><br>
+          <label for="puesto_de_trabajo">Puesto de Trabajo:</label>
+          <input type="text" id="puesto_de_trabajo" name="puesto_de_trabajo" value="{{ empleados[4] }}" readonly><br><br>
           <label for="fecha_contratacion">Fecha de Contratación:</label>
-          <input type="text" id="fecha_contratacion" name="fecha_contratacion" value="{{ empleado[5] }}" readonly><br><br>
+          <input type="text" id="fecha_contratacion" name="fecha_contratacion" value="{{ empleados[5] }}" readonly><br><br>
           <label for="sucursal">Sucursal:</label>
-          <input type="text" id="sucursal" name="sucursal" value="{{ empleado[6] }}" readonly><br><br>
+          <input type="text" id="sucursal" name="sucursal" value="{{ empleados[6] }}" readonly><br><br>
           <label for="salario">Salario:</label>
-          <input type="text" id="salario" name="salario" value="{{ empleado[7] }}" readonly><br><br>
+          <input type="text" id="salario" name="salario" value="{{ empleados[7] }}" readonly><br><br>
           <label for="email">Email:</label>
-          <input type="email" id="email" name="email" value="{{ empleado[8] }}" readonly><br><br>
+          <input type="email" id="email" name="email" value="{{ empleados[8] }}" readonly><br><br>
           <label for="telefono">Teléfono:</label>
-          <input type="text" id="telefono" name="telefono" value="{{ empleado[9] }}" readonly><br><br>
+          <input type="text" id="telefono" name="telefono" value="{{ empleados[9] }}" readonly><br><br>
 
-          <button type="submit" onclick="return confirm('¿Estás seguro de eliminar a {{ empleado[1] }}?');">Eliminar</button>
+          <button type="submit" onclick="return confirm('¿Estás seguro de eliminar a {{ empleados[1] }}?');">Eliminar</button>
         </form>
         
         <br>
-        <a href="{{ url_for('empleados') }}">Lista de empleados</a>
+        <a href="{{ url_for('empleados') }}">Lista de Empleadoss</a>
     </div>
 </body>
 </html>

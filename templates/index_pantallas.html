@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ingresar pantallas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Ingresar pantallas</h2>
+        <form id="pantallasForm" action="{{ url_for('submit_pantallas') }}" method="post">
+            <label for="nombre_pantallas">Nombre de la pantallas:</label>
+            <input type="text" id="nombre_pantallas" name="nombre_pantallas" required><br><br>
+            
+            <label for="Descripcion">Descripción:</label>
+            <input type="text" id="Descripcion" name="Descripcion" required><br><br>
+            
+            <input type="submit" value="Guardar">
+        </form> 
+        <br>
+        <a href="{{ url_for('pantallas') }}">Lista de pantallas</a>
+    </div>
+</body>
+</html>

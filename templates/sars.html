@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de SARS</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+    <h1 style="text-align: center;">Listado de SARS</h1><br>
+    {% if session.get('permiso_crear_16') == 1 %}
+    <a class="button-link ing" href="{{ url_for('index_sar') }}">Agregar nuevo SAR</a>
+    {% endif %}
+    <br><br>
+    <a href="http://127.0.0.1:5030/index_principal">
+        <button type="button" style="background-color: black; color: white;">INICIO</button>
+    </a>
+    {% if session.get('permiso_exportar_excel_16') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_excel_sar') }}">Descargar Lista en Excel</a>
+    {% endif %}
+    {% if session.get('permiso_exportar_pdf_16') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+    {% endif %}
+    <a href="http://127.0.0.1:5033">
+        <button type="button" style="background-color: rgba(24, 70, 197, 0.251); color: white;">Ir a generar factura</button>
+    </a>
+    
+    <br><br>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>RTN</th>
+                <th>CAI</th>
+                <th>Fecha de Emisión</th>
+                <th>Fecha de Vencimiento</th>
+                <th>Rango Inicial</th>
+                <th>Rango Final</th>
+                <th>Sucursal</th>
+                <th>Secuencial</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sar in sar %}
+            <tr>
+                <td>{{ sar[0] }}</td>
+                <td>{{ sar[1] }}</td>
+                <td>{{ sar[2] }}</td>
+                <td>{{ sar[3] }}</td>
+                <td>{{ sar[4] }}</td>
+                <td>{{ sar[5] }}</td>
+                <td>{{ sar[6] }}</td>
+                <td>{{ sar[7] }}</td>
+                <td>{{ sar[8] }}</td>
+                <td>{{ sar[9] }}</td>
+                <td>
+                    {% if session.get('permiso_editar_16') == 1 %}
+                    <a class="button-link baa" href="{{ url_for('edit_sar', id_sar=sar[0]) }}">Editar<i class='bx bx-edit' style='color:#000000'></i></a>
+                    {% endif %}
+                    {% if session.get('permiso_eliminar_16') == 1 %}
+                    <a class="button-link bee" href="{{ url_for('eliminar_sar', id_sar=sar[0]) }}">Borrar<i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+</div>
+</body>
+</html>

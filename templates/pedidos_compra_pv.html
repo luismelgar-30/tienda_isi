@@ -12,23 +12,33 @@
         }
     </script>
     <style>
-        .action-link {
-            display: inline-flex;
+        .action-button {
+            border: none;
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
             align-items: center;
-            text-decoration: none;
-            color: inherit;
         }
 
-        .action-link i {
-            margin-left: 5px; /* Espacio entre el texto y el icono */
+        .action-button i {
+            margin-left: 5px;
         }
 
-        .action-link.delete i {
-            color: #e74c3c; /* Color del icono para eliminar */
+        .action-button.edit {
+            background-color: #3498db;
+            color: white;
         }
 
-        .action-link.delete {
-            color: #e74c3c; /* Color del texto para eliminar */
+        .action-button.delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .action-button.view {
+            background-color: #2ecc71;
+            color: white;
         }
 
         .actions-container {
@@ -40,23 +50,56 @@
 <body>
     <div class="container">
     <h2>Lista de Pedidos de Compra</h2>
-    
+
     <form method="get" action="{{ url_for('pedidos_compra_pv') }}">
-        <input type="text" name="search" placeholder="Buscar..." value="{{ search_query }}">
+        {% if session.get('permiso_buscador_10') == 1 %}
+        <input type="text" name="search_query" placeholder="Buscar pedidos_compra_pv..." value="{{ search_query }}">
+        <select name="search_criteria">
+            <option value="id_pedido" {% if search_criteria == 'id_pedido' %}selected{% endif %}>Id Pedido</option>
+            <option value="id_proveedor" {% if search_criteria == 'id_proveedor' %}selected{% endif %}>Proveedor</option>
+            <option value="correo" {% if search_criteria == 'correo' %}selected{% endif %}>Correo</option>
+            <option value="pedidos_compra_pv_activo" {% if search_criteria == 'pedidos_compra_pv_activo' %}selected{% endif %}>pedidos_compra_pv Activo</option>
+        </select>
         <button type="submit">Buscar</button>
+        
     </form>
     
     <br>
-    <a class="button-link ing" href="{{ url_for('index_pedidos_compra_p') }}">Ingresar nuevo pedido</a>
-    <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
+    <form method="get" action="{{ url_for('pedidos_compra_pv') }}">
+        <label for="per_page">Elementos por página:</label>
+        <select name="per_page" id="per_page" onchange="this.form.submit()">
+            <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+            <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+        </select>
 
+        <input type="hidden" name="search_query" value="{{ search_query }}">
+        <input type="hidden" name="search_criteria" value="{{ search_criteria }}">
+        {% endif %}
+    </form>
+    
+    <br>
+    {% if session.get('permiso_crear_10') == 1 %}
+    <a class="button-link ing" href="{{ url_for('index_pedidos_compra_p') }}">Ingresar nuevo pedido</a>
+    {% endif %}
+    <a class="button-link ing2" href="http://127.0.0.1:5022/detalles_p">Ir a detalles</a>
+    <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+    {% if session.get('permiso_exportar_excel_10') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_excel') }}">Descargar Lista en Excel</a>
+    {% endif %}
+    {% if session.get('permiso_exportar_excel_10') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_pedidos_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+    {% endif %}
     <table>
         <thead>
             <tr>
                 <th>ID Pedido</th>
                 <th>Proveedor</th>
+                <th>Empleado</th>
+                <th>Numero De Factura</th>
                 <th>Fecha Pedido</th>
-                <th>Fecha Entrega</th>
+                <th>Fecha Entrega Estimada</th>
+                <th>Fecha de Recepcion</th>
                 <th>Método</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -67,28 +110,38 @@
             <tr>
                 <td>{{ pedido[0] }}</td>
                 <td>{{ pedido[1] }}</td>
+                <td>{{ pedido[8] }}</td>
                 <td>{{ pedido[2] }}</td>
                 <td>{{ pedido[3] }}</td>
                 <td>{{ pedido[4] }}</td>
                 <td>{{ pedido[5] }}</td>
+                <td>{{ pedido[6] }}</td>
+                <td>{{ pedido[7] }}</td>
                 <td class="actions-container">
-                    <a class="action-link" href="#" onclick="openEditWindow('{{ url_for('edit_pedidos_compra_p', id_pedido=pedido[0]) }}')">Editar <i class='bx bx-edit'></i></a>
-                    <a class="action-link delete" href="#" onclick="openEditWindow('{{ url_for('eliminar_pedido', id_pedido=pedido[0]) }}')">Eliminar <i class='bx bx-trash-alt'></i></a> <!-- Aquí asegúrate de que el nombre del endpoint sea 'eliminar_pedido' -->
+                    {% if session.get('permiso_editar_10') == 1 %}
+                    <button class="action-button edit" onclick="openEditWindow('{{ url_for('edit_pedidos_compra_p', id_pedido=pedido[0]) }}')">Editar <i class='bx bx-edit'></i></button>
+                    {% endif %}
+                    {% if session.get('permiso_eliminar_10') == 1 %}
+                    <button class="action-button delete" onclick="openEditWindow('{{ url_for('eliminar_pedido', id_pedido=pedido[0]) }}')">Eliminar <i class='bx bx-trash-alt'></i></button>
+                    {% endif %}
+                    {% if session.get('permiso_ver_10') == 1 %}
+                    <button class="action-button view" onclick="openEditWindow('{{ url_for('ver_pedido', id_pedido=pedido[0]) }}')">Ver <i class='bx bx-search-alt-2'></i></button>
+                    {% endif %}
                 </td>
-                
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    
     <div class="pagination">
         {% if page > 1 %}
-        <a href="{{ url_for('pedidos_compra_pv', page=page-1, search=search_query) }}">&laquo; Anterior</a>
+        <a href="{{ url_for('pedidos_compra_pv', search_criteria=search_criteria, search_query=search_query, page=page-1, per_page=per_page) }}">« Anterior</a>
         {% endif %}
         {% for p in range(1, total_pages + 1) %}
-        <a href="{{ url_for('pedidos_compra_pv', page=p, search=search_query) }}" class="{{ 'active' if p == page else '' }}">{{ p }}</a>
+        <a href="{{ url_for('pedidos_compra_pv', search_criteria=search_criteria, search_query=search_query, page=p, per_page=per_page) }}" {% if p == page %}class="active"{% endif %}>{{ p }}</a>
         {% endfor %}
         {% if page < total_pages %}
-        <a href="{{ url_for('pedidos_compra_pv', page=page+1, search=search_query) }}">Siguiente &raquo;</a>
+        <a href="{{ url_for('pedidos_compra_pv', search_criteria=search_criteria, search_query=search_query, page=page+1, per_page=per_page) }}">Siguiente »</a>
         {% endif %}
     </div>
     </div>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Factura</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.26/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const { jsPDF } = window.jspdf;
+
+            function convertirNumeroALetras(num) {
+                if (num === 0) return 'cero';
+                if (num < 0) return 'menos ' + convertirNumeroALetras(Math.abs(num));
+
+                const unidades = ['cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
+                const decenas = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
+                const decenas10 = ['veinte', 'veintiuno', 'veintidós', 'veintitrés', 'veinticuatro', 'veinticinco', 'veintiséis', 'veintisiete', 'veintiocho', 'veintinueve'];
+                const decenas20 = ['treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+                const centenas = ['ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+
+                if (num < 10) return unidades[num];
+                if (num < 20) return decenas[num - 10];
+                if (num < 30) return decenas10[num - 20];
+                if (num < 100) return decenas20[Math.floor(num / 10) - 2] + (num % 10 !== 0 ? ' y ' + unidades[num % 10] : '');
+                if (num < 1000) return (num === 100 ? 'cien' : centenas[Math.floor(num / 100) - 1] + (num % 100 !== 0 ? ' ' + convertirNumeroALetras(num % 100) : ''));
+
+                return 'Número demasiado grande para convertir';
+            }
+
+            document.getElementById('convertir-pdf').addEventListener('click', function() {
+                const doc = new jsPDF();
+                const imgUrl = '{{ url_for('static', filename='descarga.png') }}';
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+
+                img.onload = function() {
+                    // Encabezado
+                    doc.setFontSize(12);
+                    doc.text('Número de Factura: ' + document.getElementById('numero-factura').textContent, 10, 10);
+                    doc.text('Ge Appliances', 10, 20); // Nombre de la empresa
+                    doc.text('CAI: 1DD83D-68CDOE-BF60E0-63BE03-09092D-96', 10, 30);
+                    doc.text('Dirección: Tegucigalpa, Los Llanos, 2 calle', 10, 40);
+                    
+
+                    // Imagen
+                    doc.addImage(img, 'PNG', 160, 10, 40, 20);
+
+                    // Fondo gris
+                    doc.setFillColor(240, 240, 240); // Gris claro
+                    doc.rect(10, 50, 190, 150, 'F');
+
+                    // Tabla de detalles
+                    const total = parseFloat(document.getElementById('total').value);
+                    const totalEnLetras = convertirNumeroALetras(total);
+
+                    doc.autoTable({
+                        head: [['Campo', 'Valor']],
+                        body: [
+                            ['Nombre del Empleado', document.getElementById('nombre').selectedOptions[0].text],
+                            ['Documento del Cliente', document.getElementById('documento').selectedOptions[0].text],
+                            ['ID del Pedido', document.getElementById('id_pedido').selectedOptions[0].text],
+                            ['Producto', document.getElementById('id_producto').selectedOptions[0].text],
+                            ['Cantidad', document.getElementById('cantidad').value],
+                            ['Precio Unitario', document.getElementById('precio_unitario').value],
+                            ['Subtotal', document.getElementById('subtotal').value],
+                            ['Impuesto', document.getElementById('id_impuesto').selectedOptions[0].text],
+                            ['Total', total.toFixed(2)]
+                        ],
+                        startY: 55,
+                        theme: 'striped'
+                    });
+
+                    // Texto del total en letras
+                    const footerY = doc.autoTable.previous.finalY + 10;
+                    doc.text('Total en letras: ' + totalEnLetras, 10, footerY);
+
+                    // Fecha y hora actual
+                    const today = new Date();
+                    const dateStr = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+                    const timeStr = `${today.getHours().toString().padStart(2, '0')}:${today.getMinutes().toString().padStart(2, '0')}`;
+
+                    // Pie de página
+                    doc.text('Fecha de creación: ' + dateStr + ' ' + timeStr, 10, footerY + 20);
+                    doc.text('Correo: grupo2@gmail.com', 10, footerY + 30);
+                    doc.text('Teléfono: 9618-7469', 10, footerY + 40);
+                    doc.text('Gracias por su compra', 10, 50);
+
+                    // Guardar PDF
+                    doc.save('Factura.pdf');
+                };
+                img.src = imgUrl;
+            });
+
+            // Generar un número de factura único basado en la fecha y hora
+            function generarNumeroFactura() {
+                const now = new Date();
+                const year = now.getFullYear().toString().slice(-2);  // Últimos dos dígitos del año
+                const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Mes con dos dígitos
+                const day = now.getDate().toString().padStart(2, '0');  // Día con dos dígitos
+                const hours = now.getHours().toString().padStart(2, '0');  // Hora con dos dígitos
+                const minutes = now.getMinutes().toString().padStart(2, '0');  // Minutos con dos dígitos
+                const seconds = now.getSeconds().toString().padStart(2, '0');  // Segundos con dos dígitos
+
+                return `FAC-${year}${month}${day}-${hours}${minutes}${seconds}`;
+            }
+
+            document.getElementById('numero-factura').textContent = generarNumeroFactura();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gestionar Factura</h1>
+        </header>
+        <main>
+            <p><strong>Número de Factura: <span id="numero-factura"></span></strong></p>
+            <form action="{{ url_for('edit_factura', id_factura=factura[0]) }}" method="POST">
+                <label for="id_sar">CAI:</label>
+                <select id="id_sar" name="id_sar">
+                    {% for sar in sar %}
+                    <option value="{{ sar[0] }}" {% if sar[0] == factura[1] %}selected{% endif %}>{{ sar[1] }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="nombre">Nombre del Empleado:</label>
+                <select id="nombre" name="nombre">
+                    {% for empleado in empleados %}
+                    <option value="{{ empleado[0] }}" {% if empleado[0] == factura[2] %}selected{% endif %}>{{ empleado[1] }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="documento">Documento del Cliente:</label>
+                <select id="documento" name="documento">
+                    {% for cliente in clientes %}
+                    <option value="{{ cliente[0] }}" {% if cliente[0] == factura[3] %}selected{% endif %}>{{ cliente[0] }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="id_pedido">ID Pedido:</label>
+                <select id="id_pedido" name="id_pedido">
+                    {% for pedido in pedidos %}
+                    <option value="{{ pedido[0] }}" {% if pedido[0] == factura[4] %}selected{% endif %}>{{ pedido[0] }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="id_producto">ID Producto:</label>
+                <select id="id_producto" name="id_producto">
+                    {% for producto in productos %}
+                    <option value="{{ producto[0] }}" {% if producto[0] == factura[5] %}selected{% endif %}>{{ producto[1] }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" id="cantidad" name="cantidad" value="{{ factura[6] }}" required>
+
+                <label for="precio_unitario">Precio Unitario:</label>
+                <input type="number" id="precio_unitario" name="precio_unitario" value="{{ factura[7] }}" required>
+
+                <label for="subtotal">Subtotal:</label>
+                <input type="number" id="subtotal" name="subtotal" value="{{ factura[8] }}" readonly>
+
+                <label for="id_impuesto">Impuesto:</label>
+                <select id="id_impuesto" name="id_impuesto">
+                    {% for impuesto in impuestos %}
+                    <option value="{{ impuesto[0] }}" {% if impuesto[0] == factura[9] %}selected{% endif %}>{{ impuesto[1] }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="total">Total:</label>
+                <input type="number" id="total" name="total" value="{{ factura[10] }}" readonly>
+
+                <button type="submit">Guardar Cambios</button><br>
+                <button type="button" id="convertir-pdf">Facturar</button>
+            </form>
+        </main>
+    </div>
+</body>
+</html>

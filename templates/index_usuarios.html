@@ -19,14 +19,21 @@
           {% endif %}
         {% endwith %}
         <form action="{{ url_for('submit') }}" method="post" onsubmit="return validateForm()">
-            <label for="name">Primer Nombre:</label>
+            <label for="primer_nombre">Primer Nombre:</label>
             <input type="text" id="primer_nombre" name="primer_nombre" required pattern="[A-Za-z]{3,15}" title="Solo letras, mínimo 3 y máximo 15 caracteres"><br><br>
-            <label for="gender">Primer Apellido:</label>
+            <label for="primer_apellido">Primer Apellido:</label>
             <input type="text" id="primer_apellido" name="primer_apellido" required pattern="[A-Za-z]{3,15}" title="Solo letras, mínimo 3 y máximo 15 caracteres"><br><br>
-            <label for="nationality">Correo:</label>
+            <label for="correo">Correo:</label>
             <input type="email" id="correo" name="correo" required pattern="[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+" title="Formato de correo inválido"><br><br>
-            <label for="nationality">Contraseña:</label>
+            <label for="password">Contraseña:</label>
             <input type="password" id="password" name="password" required minlength="6" maxlength="20" title="Mínimo 6 y máximo 20 caracteres"><br><br>
+            <label for="sucursal">Sucursal:</label>
+            <select id="id_sucursal" name="id_sucursal" required>
+                <option value="" disabled selected>Seleccione una sucursal</option>
+                {% for sucursal in sucursales %}
+                    <option value="{{ sucursal[0] }}">{{ sucursal[1] }}</option>
+                {% endfor %}
+            </select><br><br>
             <input type="submit" value="Guardar">
         </form>
         <br>
@@ -38,6 +45,7 @@
             var primer_apellido = document.getElementById('primer_apellido').value;
             var correo = document.getElementById('correo').value;
             var password = document.getElementById('password').value;
+            var sucursal = document.getElementById('id_sucursal').value;
             var regexTresLetrasRepetidas = /(.)\1{2,}/;
 
             if (regexTresLetrasRepetidas.test(primer_nombre) || regexTresLetrasRepetidas.test(primer_apellido)) {
@@ -47,6 +55,11 @@
 
             if (/[^A-Za-z]/.test(primer_nombre) || /[^A-Za-z]/.test(primer_apellido)) {
                 alert('No se permiten signos ni números en los campos de nombre y apellido.');
+                return false;
+            }
+
+            if (!sucursal) {
+                alert('Debe seleccionar una sucursal.');
                 return false;
             }
 

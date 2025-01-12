@@ -1,54 +1,36 @@
+<!-- edit_transportista.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Editar Transportista</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>Editar Transportista</h1>
-        <form id="editForm" method="POST" action="{{ url_for('edit_transportista', id_transportista=transportista[0]) }}">
-            <label>Nombre de la Empresa:</label>
-            <input type="text" name="nombre_empresa" value="{{ transportista[1] }}" required>
-            <label>Teléfono:</label>
-            <input type="text" name="Telefono" id="Telefono" value="{{ transportista[2] }}" required>
-            <button type="submit">Guardar Cambios</button>
-        </form>
-        <br>
-        <a href="#" onclick="closeWindow()">Cerrar ventana</a>
-    </div>
-
     <script>
-        function closeWindow() {
-            window.close();
-        }
-
-        document.getElementById('editForm').addEventListener('submit', function(event) {
-            event.preventDefault();  // Evita el envío del formulario por defecto
-
-            var formData = new FormData(this);
-            fetch(this.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    closeWindow();
-                    if (window.opener) {
-                        window.opener.location.reload(); // Recarga la ventana principal
-                    }
-                } else {
-                    throw new Error('Error al actualizar el transportista');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-
-        // Función para formatear el número de teléfono con un guion automáticamente
         document.addEventListener('DOMContentLoaded', function() {
+            function validateForm(event) {
+                var nombreEmpresa = document.getElementsByName('nombre_empresa')[0].value;
+                var telefono = document.getElementById('Telefono').value;
+
+                // Validación para el campo nombre_empresa
+                var nombreEmpresaRegex = /^[A-Za-z\s]{5,20}$/;
+                var threeConsecutiveLetters = /([A-Za-z])\1{2}/;
+                if (!nombreEmpresaRegex.test(nombreEmpresa) || threeConsecutiveLetters.test(nombreEmpresa)) {
+                    alert('El nombre de la empresa debe tener entre 5 y 20 caracteres, solo debe contener letras y espacios, y no debe tener más de tres letras seguidas.');
+                    event.preventDefault();
+                    return false;
+                }
+
+                // Validación para el campo telefono
+                var telefonoRegex = /^[23789][0-9]{7}$/;
+                if (!telefonoRegex.test(telefono.replace(/-/g, ''))) {
+                    alert('El teléfono debe tener exactamente 8 números, comenzar con 2, 3, 7, 8, o 9.');
+                    event.preventDefault();
+                    return false;
+                }
+
+                return true;
+            }
+
             var telefonoInput = document.getElementById('Telefono');
             if (telefonoInput) {
                 telefonoInput.addEventListener('input', function(event) {
@@ -65,7 +47,53 @@
                     telefonoInput.value = initialValue.slice(0, 4) + '-' + initialValue.slice(4, 8);
                 }
             }
+
+            var editForm = document.getElementById('editForm');
+            editForm.addEventListener('submit', function(event) {
+                if (!validateForm(event)) {
+                    return;  // Detiene el envío del formulario si la validación falla
+                }
+                
+                event.preventDefault();  // Evita el envío del formulario por defecto
+
+                var formData = new FormData(this);
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        if (window.opener) {
+                            window.opener.location.reload(); // Recarga la ventana principal
+                        }
+                        closeWindow();
+                    } else {
+                        throw new Error('Error al actualizar el transportista');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
         });
+
+        function closeWindow() {
+            window.close();
+        }
     </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Editar Transportista</h1>
+        <form id="editForm" method="POST" action="{{ url_for('edit_transportista', id_transportista=transportista[0]) }}">
+            <label>Nombre de la Empresa:</label>
+            <input type="text" name="nombre_empresa" value="{{ transportista[1] }}" required>
+            <label>Teléfono:</label>
+            <input type="text" name="Telefono" id="Telefono" value="{{ transportista[2] }}" required>
+            <button type="submit">Guardar Cambios</button>
+        </form>
+        <br>
+        <a href="#" onclick="closeWindow()">Cerrar ventana</a>
+    </div>
 </body>
 </html>

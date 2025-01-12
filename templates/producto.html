@@ -13,6 +13,7 @@
 
     <!-- Formulario de búsqueda -->
     <form method="get" action="{{ url_for('producto') }}">
+        {% if session.get('permiso_buscador_1') == 1 %}
         <input type="text" name="search_query" placeholder="Buscar..." value="{{ search_query }}">
         
         <!-- Menú desplegable para seleccionar el campo de búsqueda -->
@@ -25,6 +26,7 @@
         </select>
         
         <button type="submit">Buscar</button>
+        {% endif %}
     </form>
 
     <br>
@@ -41,10 +43,18 @@
     </form>
 
     <br>
+    {% if session.get('permiso_crear_1') == 1 %}
     <a class="button-link ing"  href="{{ url_for('index_producto') }}">Ingresar Productos</a>
+    {% endif %}
     <a class="button-link ing"  href="{{ url_for('historico_productos') }}">Historico de Productos</a>
-    <a class="button-link ing2"  href="http://127.0.0.1:5501/index.html">INICIO</a>
-
+    <a class="button-link ing2"  href="http://127.0.0.1:5030/index_principal">INICIO</a>
+    {% if session.get('permiso_exportar_excel_1') == 1 %}
+    <a class="button-link ing" href="{{ url_for('exportar_productos') }}">Descargar Lista en Excel</a>
+    {% endif %}
+    {% if session.get('permiso_exportar_pdf_1') == 1 %}
+    <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+    {% endif %}
+    
     <!-- Tabla de resultados -->
     <table>
         <thead>
@@ -57,7 +67,10 @@
                 <th>Tasa Impuesto</th>
                 <th>Descuento</th>
                 <th>Duracion</th>
+                {% if session.get('permiso_crear_1') == 1 %}
                 <th>Acciones</th>
+                {% endif %}
+
             </tr>
         </thead>
         <tbody>
@@ -68,13 +81,17 @@
                 <td>{{ producto[8] }}</td>
                 <td>{{ producto[9] }}</td>
                 <td>{{ producto[4] }}</td>
-                <td>{{ producto[10] }}</td>
+                <td>{{ producto[10] }}%</td>
                 <td>{{ producto[11] }}</td>
                 <td>{{ producto[12] }}</td>
               
                 <td>
+                    {% if session.get('permiso_editar_1') == 1 %}
                     <a class="button-link baa" onclick="openEditWindow('{{ url_for('edit_producto', id_producto=producto[0]) }}')">Editar <i class='bx bx-edit' style='color:#000000'></i></a></button>
+                    {% endif %}
+                    {% if session.get('permiso_eliminar_1') == 1 %}
                     <a class="button-link bee" href="{{ url_for('eliminar_producto', id_producto=producto[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -82,17 +99,18 @@
     </table>
 
    <!-- Controles de paginación -->
-   <div class="pagination">
+    <div class="pagination">
     {% if page > 1 %}
-    <a href="{{ url_for('producto', search_criteria=search_criteria, search_query=search_query, page=page-1, per_page=per_page) }}">« Anterior</a>
+    <a href="{{ url_for('producto', search_criteria=search_criteria, search_query=search_query, page=page-1, per_page=per_page) }}">Anterior</a>
     {% endif %}
     {% for p in range(1, total_pages + 1) %}
     <a href="{{ url_for('producto', search_criteria=search_criteria, search_query=search_query, page=p, per_page=per_page) }}" {% if p == page %}class="active"{% endif %}>{{ p }}</a>
     {% endfor %}
     {% if page < total_pages %}
-    <a href="{{ url_for('producto', search_criteria=search_criteria, search_query=search_query, page=page+1, per_page=per_page) }}">Siguiente »</a>
+    <a href="{{ url_for('producto', search_criteria=search_criteria, search_query=search_query, page=page+1, per_page=per_page) }}">Siguiente</a>
     {% endif %}
-</div>
+    </div>
+
 
     <script>
         function openEditWindow(url) {

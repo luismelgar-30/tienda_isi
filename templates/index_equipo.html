@@ -8,42 +8,55 @@
 <body>
     <div class="container">
         <h1>Gestión de Equipos</h1>
-        <form action="{{ url_for('submit') }}" method="POST">
+        <form id="equipoForm" action="{{ url_for('submit') }}" method="POST">
             <label for="id_equipo">ID del Equipo:</label>
-            <select id="id_equipo" name="id_equipo" required>
-                <option value="3030">3030</option>
-                <option value="0909">0909</option>
-                <option value="2222">2222</option>
-            </select>
-            
+            <input type="text" id="id_equipo" name="id_equipo" required placeholder="Ingrese ID del equipo" pattern="\d{4}" title="Debe tener exactamente 4 números">
+
             <label for="tipo">Tipo:</label>
-            <select id="tipo" name="tipo" required>
-                <option value="electrico">Eléctrico</option>
-                <option value="mecanico">Mecánico</option>
-                <option value="automatico">Automático</option>
-                <option value="no_automatico">No Automático</option>
-            </select>
-            
+            <input type="text" id="tipo" name="tipo" required placeholder="Ingrese tipo de equipo">
+
             <label for="modelo">Modelo:</label>
-            <select id="modelo" name="modelo" required>
-                <option value="nuevo">Nuevo</option>
-                <option value="viejo">Viejo</option>
-            </select>
-            
+            <input type="text" id="modelo" name="modelo" required placeholder="Ingrese modelo" pattern="[A-Za-z]{4,10}\d{0,2}" title="Debe tener entre 4 y 10 letras y hasta 2 números al final">
+
             <label for="numero_serie">Número de Serie:</label>
-            <input type="number" id="numero_serie" name="numero_serie" required min="0" max="9999" step="1" placeholder="1234" pattern="\d{4}">
-            
+            <input type="text" id="numero_serie" name="numero_serie" required placeholder="Ingrese número de serie" pattern="\d{7}" title="Debe tener exactamente 7 números">
+
             <label for="estado">Estado:</label>
             <select id="estado" name="estado" required>
-                <option value="bueno">Bueno</option>
-                <option value="medio">Medio</option>
-                <option value="malo">Malo</option>
-                <option value="en_reparacion">En Reparación</option>
+                <option value="Buen estado">Buen estado</option>
+                <option value="Dañado">Dañado</option>
+                <option value="Revisión">Revisión</option>
             </select>
-            
+            <br>
+
             <button type="submit">Agregar Equipo</button>
         </form>
         <a href="{{ url_for('equipos') }}">Ver Equipos</a>
     </div>
+
+    <script>
+        document.getElementById('equipoForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Si la respuesta del servidor es exitosa, redirige a la página deseada
+                    window.location.href = 'http://127.0.0.1:5020/equipos';
+                } else {
+                    alert('Hubo un error al guardar los datos. Por favor, revisa las validaciones.');
+                }
+            })
+            .catch(error => {
+                console.error('Error al enviar el formulario:', error);
+            });
+        });
+    </script>
 </body>
 </html>

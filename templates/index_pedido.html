@@ -2,43 +2,173 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Nuevo Pedido</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Nuevo Pedido</title>
+    <script>
+        function validarFormulario() {
+            var inputs = document.querySelectorAll('input[type="text"]');
+            var valid = true;
+            var errorMessages = [];
+
+            inputs.forEach(function(input) {
+                var value = input.value;
+
+                // Solo aplicar validaciones si el campo no está vacío
+                if (value !== "") {
+                    // No se permiten caracteres especiales
+
+                    // No se permiten letras repetidas más de dos veces consecutivas
+                    if (/([a-zA-Z])\1\1/.test(value)) {
+                        errorMessages.push("No se permite repetir la misma letra más de dos veces consecutivas en " + input.name);
+                        valid = false;
+                    }
+
+                    // Longitud mínima de 3 caracteres
+                    if (value.length < 3) {
+                        errorMessages.push(input.name + " debe tener al menos 3 caracteres");
+                        valid = false;
+                    }
+
+                    // No se permite repetir la misma vocal dos veces consecutivas
+                    if (/([aeiouAEIOU])\1/.test(value)) {
+                        errorMessages.push("No se permite repetir la misma vocal dos veces consecutivas en " + input.name);
+                        valid = false;
+                    }
+                }
+            });
+
+            
+
+            // Validación de fechas
+            var fechaPedido = new Date(document.getElementById('fecha_pedido').value);
+            var fechaEntrega = document.getElementById('fecha_entrega').value ? new Date(document.getElementById('fecha_entrega').value) : null;
+            var fechaEntregaEstimada = document.getElementById('fecha_entrega_estimada').value ? new Date(document.getElementById('fecha_entrega_estimada').value) : null;
+
+            // Fecha de pedido no puede ser antes de hoy
+            var hoy = new Date();
+            hoy.setHours(0, 0, 0, 0); // Establecer la hora en 00:00:00 para la comparación
+            if (fechaPedido < hoy) {
+                errorMessages.push("La fecha de pedido no puede ser antes de hoy");
+                valid = false;
+            }
+
+            // Fecha de entrega estimada no puede ser antes de la fecha de pedido
+            if (fechaEntregaEstimada && fechaEntregaEstimada < fechaPedido) {
+                errorMessages.push("La fecha de entrega estimada no puede ser antes que la fecha del pedido");
+                valid = false;
+            }
+
+            // Fecha de entrega estimada tiene que ser al menos 5 días después de la fecha de pedido
+            var cincoDiasDespues = new Date(fechaPedido);
+            cincoDiasDespues.setDate(fechaPedido.getDate() + 5);
+            if (fechaEntregaEstimada && fechaEntregaEstimada < cincoDiasDespues) {
+                errorMessages.push("La fecha de entrega estimada debe ser al menos 5 días después de la fecha del pedido");
+                valid = false;
+            }
+
+            // Fecha de entrega no puede ser antes de la fecha de entrega estimada
+            if (fechaEntrega && fechaEntrega < fechaEntregaEstimada) {
+                errorMessages.push("La fecha de entrega no puede ser antes de la fecha de entrega estimada");
+                valid = false;
+            }
+
+            if (errorMessages.length > 0) {
+                alert(errorMessages.join("\n"));
+            }
+
+            return valid;
+        }
+
+        
+
+        async function guardarYRedirigir() {
+            var formulario = document.querySelector('form');
+            if (validarFormulario()) {
+                var formData = new FormData(formulario);
+                try {
+                    await fetch(formulario.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    // Redirigir después de que el formulario se haya enviado
+                    window.location.href = 'http://127.0.0.1:5023/index_detalle';
+                } catch (error) {
+                    alert('Error al guardar el formulario.');
+                }
+            }
+        }
+    </script>
+
+    <!-- Incluir CSS de Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- Incluir jQuery (si aún no lo tienes) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Incluir JS de Select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 </head>
 <body>
     <div class="container">
-    <h1>Nuevo Pedido</h1>
-    <form action="{{ url_for('submit') }}" method="post">
-        <label for="id_cliente">Cliente:</label>
-        <select id="id_cliente" name="id_cliente" required>
-            {% for cliente in clientes %}
-                <option value="{{ cliente[0] }}">{{ cliente[1] }}</option>
-            {% endfor %}
-        </select><br>
+        <h1>Nuevo Pedido</h1>
+        <form onsubmit="return validarFormulario()" action="{{ url_for('submit') }}" method="post">
+            <label for="id_cliente">Cliente:</label>
+            <select id="id_cliente" name="id_cliente" required>
+                <option value="">Seleccione un cliente</option>
+                {% for cliente in clientes %}
+                    <option value="{{ cliente[0] }}">{{ cliente[1] }}</option>
+                {% endfor %}
+            </select><br>
 
-        <label for="fecha_pedido">Fecha Pedido:</label>
-        <input type="date" id="fecha_pedido" name="fecha_pedido" required><br>
+            <label for="empleados">Empleado:</label>
+            <input type="text" name="empleados" value="{{ session.nombre_empleado }} {{ session.apellido_empleado }}" readonly>
+            
+            <label for="fecha_pedido">Fecha Pedido:</label>
+            <input type="date" id="fecha_pedido" name="fecha_pedido" required><br>
 
-        <label for="fecha_entrega">Fecha Entrega:</label>
-        <input type="date" id="fecha_entrega" name="fecha_entrega" required><br>
+            <label for="fecha_entrega_estimada">Fecha Entrega Estimada:</label>
+            <input type="date" id="fecha_entrega_estimada" name="fecha_entrega_estimada" required><br><br>
 
-        <label for="id_metodo">Método de Pago:</label>
-        <select id="id_metodo" name="id_metodo" required>
-            {% for metodo in metodos %}
-                <option value="{{ metodo[0] }}">{{ metodo[1] }}</option>
-            {% endfor %}
-        </select><br>
+            <label for="fecha_entrega">Fecha Entrega:</label>
+            <input type="date" id="fecha_entrega" name="fecha_entrega"><br>
 
-        <label for="id_estado">Estado:</label>
-        <select id="id_estado" name="id_estado" required>
-            {% for estado in estados %}
+            <label for="id_metodo">Método de Pago:</label>
+            <select id="id_metodo" name="id_metodo" required>
+                <option value="">Seleccione un metodo de pago</option>
+                {% for metodo in metodos %}
+                    <option value="{{ metodo[0] }}">{{ metodo[1] }}</option>
+                {% endfor %}
+            </select><br>
+
+            <label for="id_estado">ID Estado:</label>
+            <select id="id_estado_display" name="id_estado_display" required disabled style="background-color: #f0f0f0; color: #555;">
+                {% for estado in estados %}
                 <option value="{{ estado[0] }}">{{ estado[1] }}</option>
-            {% endfor %}
-        </select><br>
+                {% endfor %}
+            </select>
 
-        <input type="submit" value="Guardar">
-    </form>
-    <a href="{{ url_for('pedidos') }}">Ver Pedidos</a>
-</div>
+            <label for="numero_factura" style="visibility: hidden;">Numero de Factura:</label>
+            <input type="text" id="numero_factura" name="numero_factura" value="{{ session.numero_factura }}" readonly style="visibility: hidden;">
+
+            <input type="hidden" name="id_estado" value="{{ estados[0][0] }}"> <!-- Usa el valor que necesites aquí -->
+            <br><br>
+
+            <button type="button" onclick="guardarYRedirigir()">Guardar y Redirigir</button>
+
+        </form>
+        <a href="{{ url_for('pedidos') }}">Ver Pedidos</a>
+    </div>
+    <!-- Inicializar Select2 -->
+<script>
+    $(document).ready(function() {
+        $('#id_cliente').select2({
+            placeholder: "Seleccione un cliente",
+            allowClear: true
+        });
+    });
+</script>
+    
 </body>
 </html>

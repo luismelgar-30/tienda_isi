@@ -2,17 +2,19 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Editar Categoria</title>
+    <title>Editar roles</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Editar Categoria</h1>
-        <form id="editForm" method="POST" action="{{ url_for('edit_categoria', id_categoria=categoria[0]) }}">
-            <label>Nombre de la Categoria:</label>
-            <input type="text" name="nombre_categoria" value="{{ categoria[1] }}" required>
+        <h1>Editar roles</h1>
+        <form id="editForm" method="POST" action="{{ url_for('edit_roles', id_roles=roles[0]) }}">
+            <label>Nombre de la roles:</label>
+            <input type="text" name="nombre_roles" id="nombre_roles" value="{{ roles[1] }}" required><br><br>
+            
             <label>Descripcion:</label>
-            <input type="text" name="Descripcion" value="{{ categoria[2] }}" required>
+            <input type="text" name="Descripcion" id="Descripcion" value="{{ roles[2] }}" required><br><br>
+            
             <button type="submit">Guardar Cambios</button>
         </form>
         <br>
@@ -25,26 +27,62 @@
         }
 
         document.getElementById('editForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+            let errors = [];
 
-            var formData = new FormData(this);
-            fetch(this.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    closeWindow();
-                    if (window.opener) {
-                        window.opener.location.reload(); // Recarga la ventana principal
+            // Validación del nombre de la categoría
+            const nombreroles = document.getElementById('nombre_roles').value;
+
+            if (/\d/.test(nombreroles)) {
+                errors.push('El nombre no puede contener números.');
+            } 
+            // Permitir letras acentuadas (á, é, í, ó, ú) y espacios
+            if (/[^a-zA-ZÁÉÍÓÚáéíóú\s]/.test(nombreroles)) {
+                errors.push('El nombre no puede contener caracteres especiales.');
+            }
+            if (nombreroles.length < 3 || nombreroles.length > 20) {
+                errors.push('El nombre debe tener entre 3 y 20 caracteres.');
+            }
+
+            // Validación de la descripción
+            const descripcion = document.getElementById('Descripcion').value;
+
+            if (/\d/.test(descripcion)) {
+                errors.push('La descripción no puede contener números.');
+            }
+            // Permitir letras acentuadas (á, é, í, ó, ú) y espacios
+            if (/[^a-zA-ZÁÉÍÓÚáéíóú\s]/.test(descripcion)) {
+                errors.push('La descripción no puede contener caracteres especiales.');
+            }
+            if (descripcion.length < 3 || descripcion.length > 50) {
+                errors.push('La descripción debe tener entre 3 y 50 caracteres.');
+            }
+
+            // Si hay errores, prevenir el envío del formulario y mostrar los mensajes
+            if (errors.length > 0) {
+                event.preventDefault();
+                alert(errors.join('\n'));
+            } else {
+                event.preventDefault();
+
+                var formData = new FormData(this);
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        closeWindow();
+                        if (window.opener) {
+                            window.opener.location.reload(); // Recarga la ventana principal
+                        }
+                    } else {
+                        throw new Error('Error al actualizar la roles');
                     }
-                } else {
-                    throw new Error('Error al actualizar la categoria');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
         });
     </script>
 </body>

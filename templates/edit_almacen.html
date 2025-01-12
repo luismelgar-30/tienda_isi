@@ -13,7 +13,22 @@
             <input type="text" id="nombre" name="nombre" value="{{ almacen[1] }}" required>
             
             <label for="direccion">Dirección:</label>
-            <input type="text" id="direccion" name="direccion" value="{{ almacen[2] }}" required>
+            <select id="direccion" name="direccion" required>
+                <option value="" disabled>Selecciona una dirección</option>
+                <option value="Tegucigalpa" {% if almacen[2] == 'Tegucigalpa' %}selected{% endif %}>Tegucigalpa</option>
+                <option value="Cortes" {% if almacen[2] == 'Cortes' %}selected{% endif %}>Cortes</option>
+                <option value="Colon" {% if almacen[2] == 'Colon' %}selected{% endif %}>Colón</option>
+                <option value="Olancho" {% if almacen[2] == 'Olancho' %}selected{% endif %}>Olancho</option>
+            </select>
+
+            
+            <label for="sucursal">Sucursal:</label>
+            <select id="sucursal" name="sucursal" required>
+                <option value="" disabled selected>Selecciona una sucursal</option>
+                {% for sucursal in sucursales %}
+                    <option value="{{ sucursal[0] }}" {% if sucursal[0] == almacen[3] %}selected{% endif %}>{{ sucursal[1] }}</option>
+                {% endfor %}
+            </select>
             
             <button type="submit">Actualizar Almacén</button>
         </form>

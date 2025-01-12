@@ -13,20 +13,21 @@
 
         <!-- Formulario de búsqueda -->
         <form method="get" action="{{ url_for('inventario') }}">
+            {% if session.get('permiso_buscador_3') == 1 %}
             <input type="text" name="search_query" placeholder="Buscar..." value="{{ search_query }}">
             
             <!-- Menú desplegable para seleccionar el campo de búsqueda -->
             <select name="search_criteria">
                 <option value="id_inventario" {% if search_criteria == 'id_inventario' %}selected{% endif %}>ID Inventario</option>
-                <option value="nombre" {% if search_criteria == 'nombre' %}selected{% endif %}>Nombre del Producto</option>
+                <option value="nombre_producto" {% if search_criteria == 'nombre_producto' %}selected{% endif %}>Nombre del Producto</option>
                 <option value="nombre_categoria" {% if search_criteria == 'nombre_categoria' %}selected{% endif %}>Nombre Categoría</option>
-                <option value="descripcion" {% if search_criteria == 'descripcion' %}selected{% endif %}>Descripción</option>
                 <option value="cantidad_en_stock" {% if search_criteria == 'cantidad_en_stock' %}selected{% endif %}>Cantidad en Stock</option>
                 <option value="stock_minimo" {% if search_criteria == 'stock_minimo' %}selected{% endif %}>Stock Mínimo</option>
                 <option value="stock_maximo" {% if search_criteria == 'stock_maximo' %}selected{% endif %}>Stock Máximo</option>
-            </select>
+           </select>
             
             <button type="submit">Buscar</button>
+            {% endif %}
         </form>
 
         <br>
@@ -43,8 +44,15 @@
         </form>
 
         <br>
-        <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
-
+        <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+        <a class="button-link ing" href="http://127.0.0.1:5035/inventario_almacen">Inventario de almacenes</a>
+        {% if session.get('permiso_exportar_excel_3') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_excel') }}">Descargar Lista en Excel</a>
+        {% endif %}
+        {% if session.get('permiso_exportar_pdf_3') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+        {% endif %}
+        
         <!-- Tabla de resultados -->
         <table>
             <thead>
@@ -68,28 +76,31 @@
                     <td>{{ inventario[4] }}</td>
                     <td>{{ inventario[5] }}</td>
                     <td>
+                        {% if session.get('permiso_editar_3') == 1 %}
                         <a class="button-link baa" onclick="openEditWindow('{{ url_for('edit_inventario', id_inventario=inventario[0]) }}')">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                        {% endif %}
+                        {% if session.get('permiso_eliminar_3') == 1 %}
                         <a class="button-link bee" href="{{ url_for('eliminar_inventario', id_inventario=inventario[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
-            
         </table>
 
         <!-- Controles de paginación -->
         <div class="pagination">
             {% if page > 1 %}
-                <a href="{{ url_for('inventario', search_criteria=search_criteria, search_query=search_query, page=page-1, per_page=per_page) }}">« Anterior</a>
+                <a href="{{ url_for('inventario', page=page-1, search_query=search_query, search_criteria=search_criteria, per_page=per_page) }}">Anterior</a>
             {% endif %}
             {% for p in range(1, total_pages + 1) %}
-                <a href="{{ url_for('inventario', search_criteria=search_criteria, search_query=search_query, page=p, per_page=per_page) }}" {% if p == page %}class="active"{% endif %}>{{ p }}</a>
+                <a href="{{ url_for('inventario', page=p, search_query=search_query, search_criteria=search_criteria, per_page=per_page) }}" {% if p == page %}class="active"{% endif %}>{{ p }}</a>
             {% endfor %}
             {% if page < total_pages %}
-                <a href="{{ url_for('inventario', search_criteria=search_criteria, search_query=search_query, page=page+1, per_page=per_page) }}">Siguiente »</a>
+                <a href="{{ url_for('inventario', page=page+1, search_query=search_query, search_criteria=search_criteria, per_page=per_page) }}">Siguiente</a>
             {% endif %}
         </div>
-
+        
         <script>
             function openEditWindow(url) {
                 window.open(url, "_blank", "width=600,height=400");

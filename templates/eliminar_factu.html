@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Eliminar Factura</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Eliminar Factura</h2>
+        <p>¿Estás seguro de que deseas eliminar la factura con ID {{ factu[0] }}?</p>
+        <form action="{{ url_for('eliminar_factu', id_factura=factu[0]) }}" method="post">
+          <button type="submit">Eliminar</button>
+          <a href="{{ url_for('factu') }}">Cancelar</a>
+        </form>
+    </div>
+</body>
+</html>

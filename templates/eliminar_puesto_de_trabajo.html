@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,28 +18,27 @@
             </ul>
           {% endif %}
         {% endwith %}
-        <form action="{{ url_for('eliminar_puesto_de_trabajo', id_puesto=puesto_de_trabajo[0]) }}" method="post">
-          <label for="id_puesto">ID puesto:</label>
-          <input type="text" id="id_puesto" name="id_puesto" value="{{ puesto_de_trabajo[0] }}" readonly><br><br>
-          <label for="id_documento">Documento:</label>
-          <input type="text" id="id_documento" name="id_documento" value="{{ puesto_de_trabajo[1] }}" readonly><br><br>
-          <label for="fecha">fecha:</label>
-          <input type="text" id="fecha" name="fecha" value="{{ puesto_de_trabajo[2] }}" readonly><br><br>
-          <label for="hora_inicio">Hora Inicio:</label>
-          <input type="text" id="hora_inicio" name="hora_inicio" value="{{ puesto_de_trabajo[3] }}" readonly><br><br>
-          <label for="hora_fin">Hora Fin:</label>
-          <input type="text" id="hora_fin" name="hora_fin" value="{{ puesto_de_trabajo[4] }}" readonly><br><br>
-          <label for="puesto_trabajo">Puesto Trabajo:</label>
-          <input type="text" id="puesto_trabajo" name="puesto_trabajo" value="{{ puesto_de_trabajo[5] }}" readonly><br><br>
-          <label for="salario">Salario:</label>
-          <input type="text" id="salario" name="salario" value="{{ puesto_de_trabajo[6] }}" readonly><br><br>
-          <br>
-          
-          <button type="submit" onclick="return confirm('¿Está seguro de eliminar este puesto de trabajo? ID: {{ puesto_de_trabajo[0] }}');">Eliminar</button>
-      </form>
-      
+        <form action="{{ url_for('delete_puesto_de_trabajo_route', id_puesto=puesto_de_trabajo[0]) }}" method="post">
+            <label for="id_puesto">ID Puesto:</label>
+            <input type="text" id="id_puesto" name="id_puesto" value="{{ puesto_de_trabajo[0] }}" readonly><br><br>
+            
+            <label for="puesto_trabajo">Puesto de Trabajo:</label>
+            <input type="text" id="puesto_trabajo" name="puesto_trabajo" value="{{ puesto_de_trabajo[1] }}" readonly><br><br>
+            
+            <label for="hora_inicio">Hora de Inicio:</label>
+            <input type="text" id="hora_inicio" name="hora_inicio" value="{{ puesto_de_trabajo[2] }}" readonly><br><br>
+            
+            <label for="hora_fin">Hora de Fin:</label>
+            <input type="text" id="hora_fin" name="hora_fin" value="{{ puesto_de_trabajo[3] }}" readonly><br><br>
+            
+            <label for="salario">Salario:</label>
+            <input type="text" id="salario" name="salario" value="{{ puesto_de_trabajo[4] }}" readonly><br><br>
+            
+            <button type="submit" onclick="return confirm('¿Está seguro de eliminar este puesto de trabajo? ID: {{ puesto_de_trabajo[0] }}');">Eliminar</button>
+        </form>
+        
         <br>
-        <a href="{{ url_for('puesto_de_trabajo') }}">Lista de puesto de trabajos</a>
+        <a href="{{ url_for('puesto_de_trabajo') }}">Lista de puestos de trabajo</a>
     </div>
 </body>
 </html>

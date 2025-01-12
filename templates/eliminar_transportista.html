@@ -7,16 +7,31 @@
 </head>
 <body>
     <div class="container">
-        <h1>Eliminar Transportista</h1>
-        <p>¿Estás seguro de que quieres eliminar al transportista con el siguiente ID?</p>
-        <ul>
-            <li><strong>ID:</strong> {{ transportista[0] }}</li>
-            <li><strong>Nombre de la Empresa:</strong> {{ transportista[1] }}</li>
-        </ul>
-        <form method="POST" action="{{ url_for('eliminar_transportista', id_transportista=transportista[0]) }}">
-            <button type="submit">Eliminar</button>
+        <h2>Eliminar Transportista</h2>
+        
+        <!-- Mensajes de estado -->
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+              {% for message in messages %}
+                <li>{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('eliminar_transportista', id_transportista=transportista[0]) }}" method="post">
+          <label for="nombre_empresa">Nombre de la Empresa:</label>
+          <input type="text" id="nombre_empresa" name="nombre_empresa" value="{{ transportista[1] }}" readonly><br><br>
+          
+          <label for="telefono">Teléfono:</label>
+          <input type="text" id="telefono" name="telefono" value="{{ transportista[2] }}" readonly><br><br>
+
+          <button type="submit" onclick="return confirm('¿Estás seguro de eliminar al transportista {{ transportista[0] }}?');">Eliminar</button>
         </form>
-        <a href="{{ url_for('transportistas') }}">Cancelar</a>
+        
+        <br>
+        <a href="{{ url_for('transportistas') }}">Volver a la lista de Transportistas</a>
     </div>
 </body>
 </html>

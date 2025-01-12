@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Permisos</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .column {
+            width: 48%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="submit"] {
+            margin-top: 15px;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 10px;
+        }
+    </style>
+        <script>
+            function validarFormulario() {
+                const permisoCrear = document.getElementById('permiso_crear').checked;
+                const permisoEditar = document.getElementById('permiso_editar').checked;
+                const permisoEliminar = document.getElementById('permiso_eliminar').checked;
+                const permisoVer = document.getElementById('permiso_ver').checked;
+    
+                return true;  // No need to validate id_rol as it is hidden
+            }
+    
+            function cerrarYRefrescar() {
+                if (window.opener) {
+                    window.opener.location.reload(); // Refrescar la ventana original
+                }
+                window.close(); // Cerrar la ventana actual
+            }
+    
+            function manejarEnvio(event) {
+                event.preventDefault(); // Prevenir el comportamiento predeterminado del formulario
+    
+                const formulario = document.getElementById('editForm');
+                const esValido = validarFormulario();
+    
+                if (esValido) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', formulario.action, true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    
+                    // Serializar los datos del formulario
+                    const formData = new FormData(formulario);
+                    const parametros = new URLSearchParams(formData).toString();
+    
+                    xhr.send(parametros);
+    
+                    xhr.onload = function() {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            cerrarYRefrescar(); // Cerrar la ventana emergente y actualizar la ventana principal
+                        } else {
+                            alert('Error al actualizar el permiso.');
+                        }
+                    };
+                }
+            }
+    
+            document.addEventListener('DOMContentLoaded', function() {
+                window.onunload = function() {
+                    if (window.opener) {
+                        window.opener.location.reload(); // Actualizar la ventana principal
+                    }
+                };
+            });
+        </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Editar Permiso</h2>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+        <form id="editForm" action="{{ url_for('edit_permisos', id_permiso=permisos[0]) }}" method="post" onsubmit="manejarEnvio(event)">
+            
+            <label for="id_rol">Rol:</label>
+            <select name="id_rol" id="id_rol" required>
+                {% for rol in roles %}
+                    <option value="{{ rol[0] }}" {% if rol[0] == permisos[1] %}selected{% endif %}>{{ rol[1] }}</option>
+                {% endfor %}
+            </select><br><br>
+            
+            <label for="id_permiso_pantalla">Pantalla:</label>
+            <select name="id_permiso_pantalla" id="id_permiso_pantalla" required>
+                {% for pantalla in n_pantallas %}
+                    <option value="{{ pantalla[0] }}" {% if pantalla[0] == permisos[6] %}selected{% endif %}>{{ pantalla[1] }}</option>
+                {% endfor %}
+            </select><br><br>
+            
+            <div class="checkbox-group">
+                <div class="column">
+                    <label><input type="checkbox" id="permiso_crear" name="permiso_crear" {% if permisos[2] %}checked{% endif %}> Crear</label>
+                    <label><input type="checkbox" id="permiso_editar" name="permiso_editar" {% if permisos[3] %}checked{% endif %}> Editar</label>
+                    <label><input type="checkbox" id="permiso_eliminar" name="permiso_eliminar" {% if permisos[4] %}checked{% endif %}> Eliminar</label>
+                    <label><input type="checkbox" id="permiso_ver" name="permiso_ver" {% if permisos[5] %}checked{% endif %}> Ver</label>
+                </div>
+                <div class="column">
+                    <label><input type="checkbox" id="permiso_buscador" name="permiso_buscador" {% if permisos[5] %}checked{% endif %}> Buscador</label>
+                    <label><input type="checkbox" id="permiso_exportar_pdf" name="permiso_exportar_pdf" {% if permisos[5] %}checked{% endif %}> Exportar PDF</label>
+                    <label><input type="checkbox" id="permiso_exportar_excel" name="permiso_exportar_excel" {% if permisos[5] %}checked{% endif %}> Exportar Excel</label>
+                </div>
+            </div>
+
+            <input type="submit" value="Actualizar">
+        </form>
+
+        <br>
+        <a href="javascript:void(0);" onclick="cerrarYRefrescar()">Lista de Permisos</a>
+    </div>
+</body>
+</html>

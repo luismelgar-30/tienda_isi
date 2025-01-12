@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Devoluciones de Compra</title>
+    <script>
+        let receiptDate = '';
+        let availableQuantity = 0;
+
+        async function loadDetalles() {
+            const idPedido = document.getElementById('id_pedido').value;
+            const response = await fetch(`/detalles/${idPedido}`);
+            const detalles = await response.json();
+            const detallesSelect = document.getElementById('id_detalle');
+            detallesSelect.innerHTML = ''; // Clear current select
+
+            availableQuantity = 0;
+
+            detalles.forEach(detalle => {
+                const option = document.createElement('option');
+                option.value = detalle.id_detalle;
+                option.text = `${detalle.nombre_producto} - Cantidad: ${detalle.cantidad}`;
+                detallesSelect.add(option);
+            });
+        }
+
+        async function loadDetalleInfo() {
+            const idDetalle = document.getElementById('id_detalle').value;
+            if (idDetalle) {
+                const response = await fetch(`/detalle-info/${idDetalle}`);
+                const detalleInfo = await response.json();
+                receiptDate = detalleInfo.fecha_recepcion;
+                availableQuantity = detalleInfo.cantidad;
+            }
+        }
+
+        // Limitar caracteres y no permitir números en el campo Motivo
+        function validateMotivo(input) {
+            input.value = input.value.replace(/[0-9]/g, ''); // Eliminar números
+        }
+
+        // Colocar la fecha actual automáticamente
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0]; // Obtener fecha en formato YYYY-MM-DD
+            document.getElementById('fecha_devolucion').value = today;
+        }
+
+        // Validar el formulario
+        function validateForm(event) {
+            const motivo = document.querySelector('input[name="motivo"]').value;
+            if (/[0-9]/.test(motivo)) {
+                alert('El campo Motivo no puede contener números.');
+                event.preventDefault(); // Evitar envío del formulario
+                return false;
+            }
+            return true;
+        }
+
+        // Función para manejar el envío del formulario
+        function handleSubmit(event) {
+            event.preventDefault(); // Evitar el envío estándar
+            if (validateForm(event)) {
+                // Si la validación pasa, enviar el formulario y redirigir
+                fetch(event.target.action, {
+                    method: 'POST',
+                    body: new FormData(event.target)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = 'http://127.0.0.1:5025/devoluciones';
+                    } else {
+                        alert('Error al guardar los datos.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Hubo un problema al enviar los datos.');
+                });
+            }
+        }
+
+        window.onload = setTodayDate; // Colocar la fecha cuando cargue la página
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Devoluciones de Compra</h2>
+
+        <form method="post" action="{{ url_for('submit') }}" onsubmit="handleSubmit(event)">
+            <label for="id_pedido">ID Pedido:</label>
+            <select id="id_pedido" name="id_pedido" onchange="loadDetalles()" required>
+                <option value="" disabled selected>Seleccionar</option>
+                {% for pedido in pedidos %}
+                    <option value="{{ pedido[0] }}">{{ pedido[0] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="id_detalle">ID Detalle:</label>
+            <select id="id_detalle" name="id_detalle" onchange="loadDetalleInfo()" required>
+                <option value="" disabled selected>Selecciona un detalle</option>
+            </select>
+
+            <label for="fecha_devolucion">Fecha Devolución:</label>
+            <input type="date" id="fecha_devolucion" name="fecha_devolucion" required>
+
+            <label for="motivo">Motivo:</label>
+            <input type="text" name="motivo" maxlength="65" oninput="validateMotivo(this)" required>
+
+            <label for="cantidad_devuelta">Cantidad Devuelta:</label>
+            <input type="number" name="cantidad_devuelta" min="0" maxlength="4" required>
+
+            <button type="submit">Registrar Devolución</button>
+        </form>
+        <br>
+        <a href="{{ url_for('devoluciones') }}">Lista de Devoluciones</a>
+    </div>
+</body>
+</html>

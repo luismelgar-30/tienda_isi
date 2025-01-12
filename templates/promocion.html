@@ -13,15 +13,16 @@
 
         <!-- Formulario de búsqueda -->
         <form method="GET" action="{{ url_for('promocion') }}">
+            {% if session.get('permiso_buscador_13') == 1 %}
             <select name="filter_by">
                 <option value="nombre" {% if filter_by == 'nombre' %}selected{% endif %}>Nombre</option>
-                <option value="valor" {% if search_criteria == 'valor' %}selected{% endif %}>Valor</option>
-        </select>
-        </select>
+                <option value="valor" {% if filter_by == 'valor' %}selected{% endif %}>Valor</option>
             </select>
             <input type="text" name="filter_value" placeholder="Valor a filtrar..." value="{{ filter_value }}">
             <button type="submit">Buscar</button>
+            
         </form>
+        
         <br>
         <form method="get" action="{{ url_for('promocion') }}">
             <label for="per_page">Elementos por página:</label>
@@ -32,13 +33,21 @@
             </select>
             <input type="hidden" name="search_query" value="{{ search_query }}">
             <input type="hidden" name="search_criteria" value="{{ search_criteria }}">
+            {% endif %}
         </form>
         <br>
 
         <br>
+        {% if session.get('permiso_crear_13') == 1 %}
         <a class="button-link ing" href="{{ url_for('index_promocion') }}">Ingresar Nuevo Descuento</a>
-        <a class="button-link ing2" href="http://127.0.0.1:5501/index.html">INICIO</a>
-
+        {% endif %}
+        <a class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+        {% if session.get('permiso_exportar_excel_13') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_excel') }}">Descargar Lista en Excel</a>
+        {% endif %}
+        {% if session.get('permiso_exportar_pdf_13') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+        {% endif %}
         <!-- Tabla de resultados -->
         <table>
             <thead>
@@ -56,8 +65,12 @@
                         <td>{{ promocion[1] }}</td>
                         <td>{{ promocion[2] }}</td>
                         <td>
+                            {% if session.get('permiso_editar_13') == 1 %}
                             <a class="button-link baa" href="#" onclick="openEditWindow('{{ url_for('editar_promocion', id_promocion=promocion[0]) }}')">Editar <i class='bx bx-edit' style='color:#000000'></i></a>
+                            {% endif %}
+                            {% if session.get('permiso_eliminar_13') == 1 %}
                             <a class="button-link bee" href="{{ url_for('eliminar_promocion', id_promocion=promocion[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
@@ -67,15 +80,16 @@
         <!-- Controles de paginación -->
         <div class="pagination">
             {% if current_page > 1 %}
-                <a href="{{ url_for('promocion', page=current_page-1, search_query=search_query, search_criteria=search_criteria) }}">« Anterior</a>
+                <a href="{{ url_for('promocion', page=current_page-1, filter_by=filter_by, filter_value=filter_value) }}">« Anterior</a>
             {% endif %}
             {% for p in range(1, total_pages + 1) %}
-                <a href="{{ url_for('promocion', page=p, search_query=search_query, search_criteria=search_criteria) }}" {% if p == current_page %}class="active"{% endif %}>{{ p }}</a>
+                <a href="{{ url_for('promocion', page=p, filter_by=filter_by, filter_value=filter_value) }}" {% if p == current_page %}class="active"{% endif %}>{{ p }}</a>
             {% endfor %}
             {% if current_page < total_pages %}
-                <a href="{{ url_for('promocion', page=current_page+1, search_query=search_query, search_criteria=search_criteria) }}">Siguiente »</a>
+                <a href="{{ url_for('promocion', page=current_page+1, filter_by=filter_by, filter_value=filter_value) }}">Siguiente »</a>
             {% endif %}
         </div>
+        
 
         <script>
             function openEditWindow(url) {

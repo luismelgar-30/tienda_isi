@@ -46,23 +46,64 @@
 </head>
 <body>
     <div class="container">
-    <br>
     <h1 style="text-align: center;">Pedidos</h1>
-    <form method="get" action="{{ url_for('pedidos') }}">
-        <a style="padding: 10px 15px; font-size: 16px;  width: auto; max-width: 100px;" class="button-link ing" href="{{ url_for('index_pedido') }}">Ingresar</a>
-        <div>
-        <br>
-        <input type="text" name="search" style="padding: 10px 15px; font-size: 16px;  width: auto; max-width: 250px;" placeholder="Buscar por cliente" value="{{ search_query }}">    
-        <input type="submit" value="Buscar" style="padding: 10px 15px; font-size: 16px;  width: auto; max-width: 100px;">
-        </div>
-        
+        <form method="get" action="{{ url_for('pedidos') }}">
+            {% if session.get('permiso_buscador_9') == 1 %}
+            <input type="text" name="search_query" placeholder="Buscar usuarios..." value="{{ search_query }}">
+            <select name="search_criteria">
+                <option value="id_pedido" {% if search_criteria == 'id_pedido' %}selected{% endif %}>ID Pedido</option>
+                <option value="numero_factura" {% if search_criteria == 'numero_factura' %}selected{% endif %}>Numero factura</option>
+                <option value="fecha_pedido" {% if search_criteria == 'fecha_pedido' %}selected{% endif %}>Fecha pedido</option>
+                {% endif %}
+
+            </select>
+            <button type="submit">Buscar</button>
+        </form>
+    <br>
+    <br>
+     <!-- Formulario para seleccionar el número de elementos por página -->
+     <form method="get" action="{{ url_for('pedidos') }}">
+        <label for="per_page">Elementos por página:</label>
+        <select name="per_page" id="per_page" onchange="this.form.submit()">
+            <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+            <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+        </select>
+        <input type="hidden" name="search_query" value="{{ search_query }}">
+        <input type="hidden" name="search_criteria" value="{{ search_criteria }}">
     </form>
+ 
+    <br>
+        {% if session.get('permiso_crear_9') == 1 %}
+        <a style="padding: 10px 15px; font-size: 16px; width: auto; max-width: 100px;" class="button-link ing" href="{{ url_for('index_pedido') }}">Ingresar Pedido de Cliente</a>
+        {% endif %}
+        <a style="padding: 10px 15px; font-size: 16px; width: auto; max-width: 100px;" class="button-link ing2" href="http://127.0.0.1:5030/index_principal">INICIO</a>
+        
+        <a href="http://127.0.0.1:5023/detalles_compra">
+            <button type="button">Ir a Detalle de Compra</button>
+        </a>
+        {% if session.get('permiso_exportar_excel_9') == 1 %}
+        <a href="{{ url_for('descargar_excel') }}"><button type="button" class="btn btn-primary">Descargar Lista en Excel</button> </a>
+        {% endif %}
+        {% if session.get('permiso_exportar_pdf_9') == 1 %}
+        <a class="button-link ing" href="{{ url_for('descargar_pdf') }}" style="background-color: gray; color: white;">Descargar PDF <i class='bx bxs-file-pdf'></i></a>
+        {% endif %}
+    <div>
+        <br>
+        
+    </div>
+        
+    
     <table>
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Cliente</th>
+                <th>Empleado</th>
+                <th>Numero Factura</th>
+                <th>Sucursal</th>
                 <th>Fecha Pedido</th>
+                <th>Fecha Entrega Estimada</th>
                 <th>Fecha Entrega</th>
                 <th>Método de Pago</th>
                 <th>Estado</th>
@@ -72,42 +113,60 @@
         <tbody>
             {% for pedido in pedidos %}
                 <tr>
-                    <td>{{ pedido[0] }}</td>
-                    <td>{{ pedido[1] }}</td>
-                    <td>{{ pedido[2] }}</td>
-                    <td>{{ pedido[3] }}</td>
-                    <td>{{ pedido[4] }}</td>
-                    <td>{{ pedido[5] }}</td>
+                    <td>{{ pedido[0] }}</td> <!-- ID del pedido -->
+                    <td>{{ pedido[1] }}</td> <!-- Nombre del cliente -->
+                    <td>{{ pedido[8] }}</td> <!-- Empleado -->
                     <td>
-                        <button class="open-modal" data-url="{{ url_for('edit_pedido', id_pedido=pedido[0]) }}">Editar <i class='bx bx-edit' style='color:#000000'></i></button>
-                        <a class="button-link bee" href="{{ url_for('eliminar_pedido', id_pedido=pedido[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                        {% if pedido[7] == "Vendido" %}
+                            {{ pedido[2] }}
+                        {% endif %}
+                    </td>
+                    
+                    <td>{{ pedido[9] }}</td> <!-- Sucursal -->
+                    <td>{{ pedido[3] }}</td> <!-- Fecha de Pedido -->
+                    <td>{{ pedido[4] }}</td> <!-- Fecha de Entrega Estimada -->
+                    <td>{{ pedido[5] }}</td> <!-- Fecha de Entrega -->
+                    <td>{{ pedido[6] }}</td> <!-- Método de Pago -->
+                    <td>{{ pedido[7] }}</td> <!-- Estado -->
+                    
+                    <td>
+                        <div>
+                            {% if session.get('permiso_editar_9') == 1 and editable_pedidos[pedido[0]] %}
+                            <button class="open-modal" data-url="{{ url_for('edit_pedido', id_pedido=pedido[0]) }}">Editar <i class='bx bx-edit' style='color:#000000'></i></button>
+                            {% endif %}
+                            
+                            {% if session.get('permiso_eliminar_9') == 1 %}
+                            <a class="button-link bee" href="{{ url_for('eliminar_pedido', id_pedido=pedido[0]) }}">Eliminar <i class='bx bx-trash-alt' style='color:#000000'></i></a>
+                            {% endif %}
+                            {% if session.get('permiso_ver_9') == 1 %}
+                                {% if get_ver_pedido_apagado(pedido[0]) %}
+                                <button class="open-modal" data-url="{{ url_for('ver_pedido', id_pedido=pedido[0]) }}" style="background-color: green; color: rgb(255, 255, 255); border: none;">
+                                    Ver <i class='bx bx-search-alt-2' style="color: black;"></i>
+                                  </button>
+                                  
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        
+                        
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
-        <select style="padding: 5px 7px; font-size: 10px; width: auto; max-width: 50px; display: block; margin: 0 auto;" name="per_page" onchange="this.form.submit()">
-            <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
-            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
-            <option value="15" {% if per_page == 15 %}selected{% endif %}>15</option>
-        </select>
     </table>
+    
+    <!-- Controles de paginación -->
     <div class="pagination">
         {% if page > 1 %}
-        <a href="{{ url_for('distribuciones', page=page-1, per_page=per_page, search=search_query) }}">Anterior</a>
+        <a href="{{ url_for('pedidos', search_criteria=search_criteria, search_query=search_query, page=page-1, per_page=per_page) }}">Anterior</a>
         {% endif %}
+        {% for p in range(1, total_pages + 1) %}
+        <a href="{{ url_for('pedidos', search_criteria=search_criteria, search_query=search_query, page=p, per_page=per_page) }}" {% if p == page %}class="active"{% endif %}>{{ p }}</a>
+        {% endfor %}
         {% if page < total_pages %}
-        <a href="{{ url_for('distribuciones', page=page+1, per_page=per_page, search=search_query) }}">Siguiente</a>
+        <a href="{{ url_for('pedidos', search_criteria=search_criteria, search_query=search_query, page=page+1, per_page=per_page) }}">Siguiente</a>
         {% endif %}
     </div>
-    <div class="pagination">
-        {% if page > 1 %}
-            <a href="{{ url_for('distribuciones', page=page-1, search=search_query, per_page=per_page) }}">Anterior</a>
-        {% endif %}
-        <span>Página {{ page }} de {{ total_pages }}</span>
-        {% if page < total_pages %}
-            <a href="{{ url_for('distribuciones', page=page+1, search=search_query, per_page=per_page) }}">Siguiente</a>
-        {% endif %}
-        </div>
 
     <!-- The Modal -->
     <div id="editModal" class="modal">

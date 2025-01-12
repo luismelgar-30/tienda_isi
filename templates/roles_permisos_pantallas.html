@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permisos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .permission {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        label {
+            margin-left: 8px;
+        }
+        .pantallas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .pantalla {
+            width: 45%;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Rol</h2>
+        <label for="id_rol">Rol:</label>
+        <select name="id_rol" id="id_rol">
+            {% for rol in roles %}
+                <option value="{{ rol[0] }}" {% if rol[0] == usuario[8] %}selected{% endif %}>{{ rol[1] }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <h2>Permisos</h2>
+        <div class="permission">
+            <input type="checkbox" id="Crear" name="permiso_Crear">
+            <label for="Crear">Crear</label>
+        </div>
+        <div class="permission">
+            <input type="checkbox" id="editar" name="permiso_editar">
+            <label for="editar">Editar</label>
+        </div>
+        <div class="permission">
+            <input type="checkbox" id="eliminar" name="permiso_eliminar">
+            <label for="eliminar">Eliminar</label>
+        </div>
+        <div class="permission">
+            <input type="checkbox" id="exportar" name="permiso_exportar">
+            <label for="exportar">Exportar</label>
+        </div>
+
+        <h2>Pantallas</h2>
+        <div class="pantallas">
+            <div class="pantalla">
+                <input type="checkbox" id="almacenes" name="pantalla_almacenes">
+                <label for="almacenes">Almacenes</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="capacitacion" name="pantalla_capacitacion">
+                <label for="capacitacion">Capacitación</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="categorias" name="pantalla_categorias">
+                <label for="categorias">Categorías</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="cliente" name="pantalla_cliente">
+                <label for="cliente">Cliente</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="detalle_p" name="pantalla_detalle_p">
+                <label for="detalle_p">Detalle Pedido</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="detalle" name="pantalla_detalle">
+                <label for="detalle">Detalle</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="devolucion_compra" name="pantalla_devolucion_compra">
+                <label for="devolucion_compra">Devolución Compra</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="impuesto" name="pantalla_impuesto">
+                <label for="impuesto">Impuesto</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="inventario_almacenes" name="pantalla_inventario_almacenes">
+                <label for="inventario_almacenes">Inventario Almacenes</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="inventario" name="pantalla_inventario">
+                <label for="inventario">Inventario</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="pedido" name="pantalla_pedido">
+                <label for="pedido">Pedido Cliente</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="pedidos_compra_p" name="pantalla_pedidos_compra_p">
+                <label for="pedidos_compra_p">Pedidos Compra Proveedor</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="producto" name="pantalla_producto">
+                <label for="producto">Producto</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="empleados" name="pantalla_empleados">
+                <label for="empleados">Empleados</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="equipo" name="pantalla_equipo">
+                <label for="equipo">Equipo</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="promocion" name="pantalla_promocion">
+                <label for="promocion">Promoción</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="puesto_de_trabajo" name="pantalla_puesto_de_trabajo">
+                <label for="puesto_de_trabajo">Puesto de Trabajo</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="sucursales" name="pantalla_sucursales">
+                <label for="sucursales">Sucursales</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="transportistas" name="pantalla_transportistas">
+                <label for="transportistas">Transportistas</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="distribucion" name="pantalla_distribucion">
+                <label for="distribucion">Gestión de Almacenes</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="mantenimiento" name="pantalla_mantenimiento">
+                <label for="mantenimiento">Mantenimiento</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="proveedores" name="pantalla_proveedores">
+                <label for="proveedores">Proveedores</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="devolucion_ventas" name="pantalla_devolucion_ventas">
+                <label for="devolucion_ventas">Devolución Ventas</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="sar" name="pantalla_sar">
+                <label for="sar">SAR</label>
+            </div>
+            <div class="pantalla">
+                <input type="checkbox" id="usuarios" name="pantalla_usuarios">
+                <label for="usuarios">Usuarios</label>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

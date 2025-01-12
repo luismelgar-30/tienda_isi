@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Ingresar Capacitación</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-
 </head>
 <body>
     <div class="container">
@@ -18,7 +17,7 @@
             </ul>
           {% endif %}
         {% endwith %}
-        <form action="{{ url_for('submit_capacitacion') }}" method="post">
+        <form id="capacitacionForm" action="{{ url_for('submit_capacitacion') }}" method="post">
             <label for="id_empleado">Empleado:</label>
             <select id="id_empleado" name="id_empleado" required>
                 {% for empleado in empleados %}
@@ -27,21 +26,69 @@
             </select><br><br>
 
             <label for="tema">Tema:</label>
-            <input type="text" id="tema" name="tema" required><br><br>
+            <input type="text" id="tema" name="tema" maxlength="30" required><br><br>
 
             <label for="fecha_capacitacion">Fecha y Hora de Capacitación:</label>
-            <input type="datetime-local" id="fecha_capacitacion" name="fecha_capacitacion" required value="{{ today }}">
+            <input type="datetime-local" id="fecha_capacitacion" name="fecha_capacitacion" required value="{{ today }}"><br><br>
 
             <label for="duracion">Duración:</label>
-            <input type="text" id="duracion" name="duracion" required><br><br>
+            <select id="duracion" name="duracion" required>
+                <option value="" disabled selected>Selecciona la duración</option>
+                <option value="1 semana">1 semana</option>
+                <option value="3 semanas">3 semanas</option>
+                <option value="1 mes">1 mes</option>
+                <option value="2 meses">2 meses</option>
+            </select><br><br>
 
-            <label for="resultado">Resultado:</label>
-            <input type="text" id="resultado" name="resultado" required><br><br>
+            <label for="resultado">Resultado (máximo 100%):</label>
+            <input type="number" id="resultado" name="resultado" min="0" max="100" required><br><br>
 
             <input type="submit" value="Guardar">
-        </form> 
+        </form>
         <br>
         <a href="{{ url_for('capacitaciones') }}">Lista de capacitaciones</a>
     </div>
+
+    <script>
+        document.getElementById('capacitacionForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evitar el envío inicial para manejarlo manualmente
+            var tema = document.getElementById('tema').value;
+            var resultado = document.getElementById('resultado').value;
+
+            var errors = [];
+
+            // Validación del tema
+            if (tema.length < 3 || tema.length > 30) {
+                errors.push('El tema debe tener entre 3 y 30 caracteres.');
+            }
+
+            // Validación del resultado
+            if (parseInt(resultado) < 0 || parseInt(resultado) > 100) {
+                errors.push('El resultado debe estar entre 0 y 100%.');
+            }
+
+            // Mostrar errores o redirigir
+            if (errors.length > 0) {
+                alert(errors.join('\n'));
+            } else {
+                // Enviar formulario y redirigir al finalizar
+                fetch(this.action, {
+                    method: this.method,
+                    body: new FormData(this)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = "http://127.0.0.1:5021/capacitaciones";
+                    } else {
+                        alert("Ocurrió un error al guardar los datos.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Ocurrió un error al guardar los datos.");
+                });
+            }
+        });
+    </script>
 </body>
 </html>
